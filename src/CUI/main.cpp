@@ -37,7 +37,7 @@ int main(int ac, char** av) {
 
         if (vm.count("file")) {
             std::cout << "Got file path "
-                      << vm["file"].as<std::string>() << ".\n";
+                      << vm["file"] .as<std::string>() << ".\n";
             //TODO: call functions
         } else {
             std::cout << "File path was not set.\n";

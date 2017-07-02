@@ -1,4 +1,5 @@
 #include "img_resize.h"
+#include "img_preprocess.h"
 #include <opencv2/opencv.hpp>
 #include <algorithm>
 
@@ -12,7 +13,7 @@ namespace resize {
         // TODO
     }
 
-    std::vector<long long> calc_dynamics(cv::Mat &in) {
+    std::vector<long long> calc_dynamics(cv::Mat& in) {
         std::vector<long long> dynamics(in.rows, 0);
         std::vector<long long> dynamics_front(in.rows, 0);
         for (int i = 0; i < in.rows; ++i) {
@@ -37,7 +38,9 @@ namespace resize {
 
     PointsVec
     dp_remove_method(cv::Mat &in) {
-        auto dynamics = calc_dynamics(in);
+        cv::Mat grad;
+        preprocess::gradient(in, grad, preprocess::HIG);
+        auto dynamics = calc_dynamics(grad);
         long long min = dynamics[0];
         int min_i = 0;
         for (int i = 0; i != dynamics.size(); ++i) {
@@ -55,8 +58,8 @@ namespace resize {
             int curr_min = 1000;
             for (int delta = -1; delta <= 1; ++delta) {
                 if (delta + curr_row < in.rows && delta + curr_row >= 0) {
-                    if (curr_min > in.at<int>(curr_row + delta, curr_col)) {
-                        curr_min = in.at<int>(curr_row + delta, curr_col);
+                    if (curr_min > grad.at<int>(curr_row + delta, curr_col)) {
+                        curr_min = grad.at<int>(curr_row + delta, curr_col);
                         suitable_delta = delta;
                     }
                 }
