@@ -1,5 +1,5 @@
 find_package (Boost COMPONENTS unit_test_framework REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
+#include_directories(${Boost_INCLUDE_DIRS})
 # set(TESTS_SOURCES
 #       tests.cpp)
 
@@ -8,4 +8,4 @@ include_directories(${Boost_INCLUDE_DIRS})
 # target_link_libraries(${TEST} <your libs here> ${Boost_LIBRARIES})
 
 # add_test(${TEST} ${TEST})
-ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
+#ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)

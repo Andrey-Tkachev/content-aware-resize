@@ -6,7 +6,7 @@ namespace preprocess {
     enum blur_extent { // Extent of gaussian blur which is used before Sobel gradient
         LOW,
         MID,
-        HIE
+        HIG
     };
 
     void gradient(cv::Mat& in, cv::Mat& out, blur_extent ext);

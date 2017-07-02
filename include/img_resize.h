@@ -2,8 +2,8 @@
 #include <vector>
 
 namespace resize {
-    typedef std::vector<cv::Point2d<int>> min_cost_path; // Pixels to add/delete
-    typedef std::vector<std::vector<int>> dp_matrix;
+    typedef std::vector<cv::Point2d<int>> MIN_COST_PATH; // Pixels to add/delete
+    typedef std::vector<std::vector<int>> DP_MATIRX;
     typedef min_cost_path(*method) (cv::Mat&); // Method of path searching
 
     enum direction {
