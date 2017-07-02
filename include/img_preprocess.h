@@ -1,3 +1,5 @@
+#include <opencv2/opencv.hpp>
+
 #ifndef CONTENTAWARERESIZE_IMG_PREPROCESS_H
 #define CONTENTAWARERESIZE_IMG_PREPROCESS_H
 

@@ -2,6 +2,7 @@
 // Created by nikita on 02.07.17.
 //
 
+#include "img_preprocess.h"
 #include <iostream>
 #include <boost/program_options.hpp>
 #include <opencv2/opencv.hpp>
@@ -63,7 +64,9 @@ int main(int ac, char** av) {
                          !vm["width"].empty() ? vm["width"].as<int>() : image.size().width,
                          !vm["height"].empty() ? vm["height"].as<int>() : image.size().height);
 
-        cv::imshow("image", image);
+        cv::Mat new_im;
+        preprocess::gradient(image, new_im, preprocess::HIG);
+        cv::imshow("image", new_im);
         cv::waitKey(0);
 
     } catch (std::exception& e) {
