@@ -6,6 +6,6 @@ set(SOURCE main.cpp)
 set(MAIN main)
 
 add_executable(${MAIN} ${SOURCE})
-target_link_libraries(${MAIN} PREPROCESS_LIB ${Boost_LIBRARIES} ${OpenCV_LIBS} RESIZE_LIB)
+target_link_libraries(${MAIN} PREPROCESS_LIB RESIZE_LIB ${Boost_LIBRARIES} ${OpenCV_LIBS})
 
 add_definitions(-DBoost_USE_STATIC_LIBS=ON)

@@ -1,4 +1,5 @@
 #include "img_preprocess.h"
+#include <iostream>
 #include <opencv2/opencv.hpp>
 
 namespace preprocess {
@@ -15,6 +16,7 @@ namespace preprocess {
     void gradient(cv::Mat& in, cv::Mat& out, blur_extent ext) {
         int blur_size = 0;
         int sigma = 0;
+
         switch (ext) {
             case blur_extent::LOW:
                 blur_size = 3;
@@ -26,13 +28,15 @@ namespace preprocess {
             case blur_extent::HIG:
                 blur_size = 11;
                 sigma = 4;
+                break;
         }
-        cv::Mat src_gray;
-        cv::GaussianBlur(in, src_gray, cv::Size(blur_size, blur_size), sigma, sigma, cv::BORDER_DEFAULT);
+        cv::Mat src_gray = in;
+
         cvtColor(src_gray, src_gray, CV_BGR2GRAY);
         cv::Mat grad_x, grad_y;
         gradient_xy(src_gray, grad_x, 1, 0);
-        gradient_xy(src_gray, grad_y, 0, 1);
-        addWeighted(grad_x, 0.5, grad_y, 0.5, 0, out);
+        //gradient_xy(src_gray, grad_y, 0, 1);
+        //addWeighted(grad_x, 0.5, grad_y, 0.5, 0, out);
+        out = grad_x;
     }
 }

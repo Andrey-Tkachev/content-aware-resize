@@ -10,6 +10,8 @@
 
 namespace po = boost::program_options;
 
+const int NORMAL_HEIGHT = 600;
+
 int main(int ac, char** av) {
     try {
         po::options_description desc("Allowed options");
@@ -17,7 +19,8 @@ int main(int ac, char** av) {
                 ("help", "print help page")
                 ("file", po::value<std::string>(), "path to file")
                 ("width", po::value<int>(), "desireable width")
-                ("height", po::value<int>(), "desireable height");
+                ("height", po::value<int>(), "desireable height")
+                ("count", po::value<int>(), "how many to fuck");
 
 
         po::positional_options_description p;
@@ -59,17 +62,15 @@ int main(int ac, char** av) {
             return 1;
         }
 
+        cv::namedWindow("original", cv::WINDOW_NORMAL);
+        cv::resizeWindow("original", image.cols, image.rows);
+
         cv::namedWindow("image", cv::WINDOW_NORMAL);
-
-        cv::resizeWindow("image",
-                         !vm["width"].empty() ? vm["width"].as<int>() : image.size().width,
-                         !vm["height"].empty() ? vm["height"].as<int>() : image.size().height);
-
         cv::Mat new_im;
-        resize::remove_k(image, new_im, resize::HORIZ, 1);
+        resize::remove_k(image, new_im, resize::HORIZ, vm["count"].as<int>());
         cv::imshow("image", new_im);
+        cv::imshow("original", image);
         cv::waitKey(0);
-
     } catch (std::exception& e) {
         std::cerr << "error: " << e.what() << "\n";
         return 1;

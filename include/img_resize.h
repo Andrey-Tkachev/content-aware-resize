@@ -2,7 +2,7 @@
 #include <vector>
 
 namespace resize {
-    typedef std::vector<cv::Point2d> PointsVec; // Pixels to add/delete
+    typedef std::vector<cv::Point2i> PointsVec; // Pixels to add/delete
     typedef std::vector<std::vector<int>> Matrix;
 
     typedef PointsVec(*method)(cv::Mat &); // Method of path searching
@@ -18,7 +18,7 @@ namespace resize {
 
     void remove_row(PointsVec& points, cv::Mat& from, cv::Mat& to);
 
-    std::vector<long long> calc_dynamics(cv::Mat &in);
+    std::vector<double> calc_dynamics(cv::Mat& in);
 
     PointsVec dp_remove_method(cv::Mat& in);
 
