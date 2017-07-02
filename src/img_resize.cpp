@@ -1,15 +1,39 @@
 #include "img_resize.h"
 #include "img_preprocess.h"
-#include <opencv2/opencv.hpp>
-#include <algorithm>
 
 namespace resize {
+
     // Remove/add k rows / columns to the image
-    void remove_k(cv::Mat &in, cv::Mat &out, direction dir) {
-        // TODO
+    void remove_k(cv::Mat& in, cv::Mat& out, direction dir, int k) {
+        cv::Mat current = in.clone();
+        cv::Mat next(in.size(), in.type());
+
+        for (int l = 0; l != k; ++l) {
+            auto pixels_to_remove = dp_remove_method(current);
+            remove_row(pixels_to_remove, current, next);
+        }
     }
 
-    void add_k(cv::Mat &in, cv::Mat &out, direction dir) {
+    void remove_row(PointsVec& points, cv::Mat& from, cv::Mat& to) {
+        for (int i = 0; i != from.size().width; ++i) {
+            int needed_j = -1;
+            for (auto el : points) {
+                if (el.x == i) {
+                    needed_j = el.y;
+                }
+            }
+            for (int j = 0, k = 0; j != from.size().height; ++j, ++k) {
+                if (j == needed_j) {
+                    j--;
+                    continue;
+                }
+                to.at<cv::Vec3b>(i, j) = from.at<cv::Vec3b>(i, k);
+            }
+        }
+    }
+
+
+    void add_k(cv::Mat& in, cv::Mat& out, direction dir) {
         // TODO
     }
 
@@ -24,7 +48,8 @@ namespace resize {
                 long long curr_min = in.at<int>(curr_row, curr_col) + dynamics[curr_row];
                 for (int delta = -1; delta <= 1; ++delta) {
                     if (delta + curr_row < in.rows && delta + curr_row >= 0) {
-                        if (curr_min > in.at<int>(curr_row, curr_col) + dynamics[curr_row + delta]) {
+                        if (curr_min >
+                            in.at<int>(curr_row, curr_col) + dynamics[curr_row + delta]) {
                             curr_min = in.at<int>(curr_row, curr_col) + dynamics[curr_row + delta];
                         }
                     }
@@ -37,7 +62,7 @@ namespace resize {
     }
 
     PointsVec
-    dp_remove_method(cv::Mat &in) {
+    dp_remove_method(cv::Mat& in) {
         cv::Mat grad;
         preprocess::gradient(in, grad, preprocess::HIG);
         auto dynamics = calc_dynamics(grad);

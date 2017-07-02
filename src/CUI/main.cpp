@@ -6,6 +6,7 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 #include <opencv2/opencv.hpp>
+#include <img_resize.h>
 
 namespace po = boost::program_options;
 
@@ -65,7 +66,7 @@ int main(int ac, char** av) {
                          !vm["height"].empty() ? vm["height"].as<int>() : image.size().height);
 
         cv::Mat new_im;
-        preprocess::gradient(image, new_im, preprocess::HIG);
+        resize::remove_k(image, new_im, resize::HORIZ, 1);
         cv::imshow("image", new_im);
         cv::waitKey(0);
 
