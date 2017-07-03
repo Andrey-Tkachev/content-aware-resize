@@ -70,7 +70,9 @@ int main(int ac, char** av) {
         resize::remove_k(image, new_im, resize::HORIZ, vm["count"].as<int>());
         cv::imshow("image", new_im);
         cv::imshow("original", image);
-        cv::waitKey(0);
+        if (cv::waitKey(30)){
+            return 0;
+        }
     } catch (std::exception& e) {
         std::cerr << "error: " << e.what() << "\n";
         return 1;

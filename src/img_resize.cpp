@@ -15,7 +15,6 @@ namespace resize {
         }
 
         out = next.clone();
-        out = out(cv::Range(0, in.rows - k), cv::Range(0, in.cols));
     }
 
     void remove_row(PointsVec& points, cv::Mat& from, cv::Mat& to) {
@@ -35,6 +34,7 @@ namespace resize {
                 to.at<cv::Vec3b>(k, i) = from.at<cv::Vec3b>(j, i);
             }
         }
+        to = to(cv::Range(0, to.rows - 1), cv::Range(0, to.cols));
     }
 
 
@@ -50,13 +50,12 @@ namespace resize {
         }
         for (int curr_col = 1; curr_col < in.cols; ++curr_col) {
             for (int curr_row = 0; curr_row < in.rows; ++curr_row) {
-                cv::Scalar init_intent = in.at<double>(cv::Point(curr_col, curr_row));
-                double curr_min = dynamics[curr_row] + static_cast<double>(init_intent[0]);
+                double curr_min = dynamics[curr_row] + in.at<double>(cv::Point(curr_col, curr_row));
                 for (int delta = -1; delta <= 1; ++delta) {
                     if (delta + curr_row < in.rows && delta + curr_row >= 0) {
-                        cv::Scalar intensity = in.at<double>(cv::Point(curr_col, curr_row));
-                        if (curr_min > intensity[0] + dynamics[curr_row + delta]) {
-                            curr_min = static_cast<double>(intensity[0]) +
+                        if (curr_min > in.at<double>(cv::Point(curr_col, curr_row)) +
+                                               dynamics[curr_row + delta]) {
+                            curr_min = in.at<double>(cv::Point(curr_col, curr_row)) +
                                        dynamics[curr_row + delta];
                         }
                     }
@@ -71,7 +70,7 @@ namespace resize {
     PointsVec
     dp_remove_method(cv::Mat& in) {
         cv::Mat grad;
-        preprocess::gradient(in, grad, preprocess::LOW);
+        preprocess::gradient(in, grad, preprocess::HIG);
         auto dynamics = calc_dynamics(grad);
         double min = dynamics[0];
         int min_i = 0;
@@ -87,11 +86,11 @@ namespace resize {
         path.emplace_back(curr_col, curr_row);
         while (curr_col > 0) {
             int suitable_delta = 0;
-            int curr_min = 1000;
+            double curr_min = 1e8;
             for (int delta = -1; delta <= 1; ++delta) {
                 if (delta + curr_row < in.rows && delta + curr_row >= 0) {
-                    if (curr_min > grad.at<uchar>(cv::Point(curr_col, curr_row + delta))) {
-                        curr_min = grad.at<uchar>(cv::Point(curr_col, curr_row + delta));
+                    if (curr_min > grad.at<double>(cv::Point(curr_col, curr_row + delta))) {
+                        curr_min = grad.at<double>(cv::Point(curr_col, curr_row + delta));
                         suitable_delta = delta;
                     }
                 }
