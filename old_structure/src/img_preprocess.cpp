@@ -27,24 +27,23 @@ namespace preprocess {
                 sigma = 2;
                 break;
             case blur_extent::HIG:
-                blur_size = 11;
+                blur_size = 20;
                 sigma = 4;
                 break;
         }
-        cv::Mat src_gray = in.clone();
-        cvtColor(src_gray, src_gray, CV_BGR2GRAY);
-        cv::GaussianBlur(src_gray, src_gray, cv::Size(blur_size, blur_size), sigma, sigma,
-                         cv::BORDER_DEFAULT);
-        //cv::bilateralFilter(src_gray.clone(), src_gray, 5, 10, 10);
+        cv::Mat src_gray;
+        cvtColor(in, src_gray, CV_BGR2GRAY);
+        cv::bilateralFilter(src_gray.clone(), src_gray, sigma, blur_size, blur_size);
         cv::Mat grad_x, grad_y;
         gradient_xy(src_gray, grad_x, 1, 0);
         gradient_xy(src_gray, grad_y, 0, 1);
         addWeighted(grad_x, 0.5, grad_y, 0.5, 1, out);
-        int dilation_size = 3;
-        cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,
+        int dilation_size = 2;
+        cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE,
                                              cv::Size( 2*dilation_size + 1, 2*dilation_size+1 ),
                                              cv::Point( dilation_size, dilation_size ) );
         cv::morphologyEx(out, out, cv::MORPH_OPEN, element);
+        //cv::GaussianBlur(out, out, cv::Size(3, 3), 1, 1, cv::BORDER_DEFAULT);
         // Apply the dilation operation
         //dilate(out, out, element);
         cv::imshow("bilateral", out);

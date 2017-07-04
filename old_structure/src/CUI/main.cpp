@@ -3,9 +3,7 @@
 //
 
 #include "img_preprocess.h"
-#include <iostream>
 #include <boost/program_options.hpp>
-#include <opencv2/opencv.hpp>
 #include <img_resize.h>
 
 namespace po = boost::program_options;
@@ -41,7 +39,7 @@ int main(int ac, char** av) {
 
         if (vm.count("file")) {
             std::cout << "Got file path "
-                      << vm["file"] .as<std::string>() << ".\n";
+                      << vm["file"].as<std::string>() << ".\n";
             //TODO: call functions
         } else {
             std::cout << "File path was not set.\n";
@@ -70,8 +68,10 @@ int main(int ac, char** av) {
         resize::remove_k(image, new_im, resize::HORIZ, vm["count"].as<int>());
         cv::imshow("image", new_im);
         cv::imshow("original", image);
-        if (cv::waitKey(30)){
-            return 0;
+        while (true) {
+            if (cv::waitKey(0) == 27) {
+                return 0;
+            }
         }
     } catch (std::exception& e) {
         std::cerr << "error: " << e.what() << "\n";
