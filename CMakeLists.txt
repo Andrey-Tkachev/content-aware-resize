@@ -16,8 +16,4 @@ add_subdirectory(config)
 add_subdirectory(core)
 add_subdirectory(filters)
 add_subdirectory(interface)
-#add_subdirectory(tests)
-
-
-#add_executable(resize ${SRC_LIST})
-#target_link_libraries( resize ${OpenCV_LIBS})
+add_subdirectory(tests)
