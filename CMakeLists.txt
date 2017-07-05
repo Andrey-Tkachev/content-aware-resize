@@ -17,9 +17,6 @@ add_subdirectory(core)
 add_subdirectory(filters)
 add_subdirectory(interface)
 add_subdirectory(utils)
-#add_subdirectory(tests)
+add_subdirectory(tests)
 
-add_executable(CUI cui/console.cpp)
-
-target_link_libraries(CUI SINGLETON_TEMPLATE)
-target_link_libraries(CUI CONFIG_LIB)
+add_subdirectory(cui)
