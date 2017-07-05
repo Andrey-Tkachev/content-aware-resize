@@ -1,0 +1,3 @@
+set(SINGLETON_TEMPLATE_SOURCE singleton.cpp ../include/singleton.h)
+
+add_library(SINGLETON_TEMPLATE SHARED ${SINGLETON_TEMPLATE_SOURCE})

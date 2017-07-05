@@ -16,8 +16,10 @@ add_subdirectory(config)
 add_subdirectory(core)
 add_subdirectory(filters)
 add_subdirectory(interface)
+add_subdirectory(utils)
 #add_subdirectory(tests)
 
+add_executable(CUI cui/console.cpp)
 
-#add_executable(resize ${SRC_LIST})
-#target_link_libraries( resize ${OpenCV_LIBS})
+target_link_libraries(CUI SINGLETON_TEMPLATE)
+target_link_libraries(CUI CONFIG_LIB)
