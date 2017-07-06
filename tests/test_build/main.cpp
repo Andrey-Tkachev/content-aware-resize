@@ -1,6 +1,6 @@
 #include "core.h"
 #include <opencv2/opencv.hpp>
-#include "iostream"
+#include <iostream>
 
 void gradient_xy(cv::Mat &in, cv::Mat &out, int x_ord,
                  int y_ord) {
@@ -14,9 +14,10 @@ void gradient_xy(cv::Mat &in, cv::Mat &out, int x_ord,
 
 void gradient(const cv::Mat &in, cv::Mat &out) {
     int blur_size = 3;
-    int sigma = 4;
+    int sigma = 5;
     cv::Mat src_gray = in.clone();
     cvtColor(src_gray, src_gray, CV_BGR2GRAY);
+    cv::bilateralFilter(src_gray.clone(), src_gray, 7, 15, 15);
     cv::GaussianBlur(src_gray, src_gray, cv::Size(blur_size, blur_size), sigma, sigma,
                      cv::BORDER_DEFAULT);
     cv::Mat grad_x, grad_y;
@@ -27,11 +28,15 @@ void gradient(const cv::Mat &in, cv::Mat &out) {
 
 int main() {
     cv::Mat image;
-    image = cv::imread("test_images/duck_640x640.jpg", CV_LOAD_IMAGE_COLOR);
+    image = cv::imread("test_images/sorry.jpg", CV_LOAD_IMAGE_COLOR);
 
     cv::Mat new_im;
-    core::shrink_to_fit(image, new_im, cv::Size(600, 600), gradient);
+
+    core::shrink_to_fit(image, new_im, cv::Size(400, 450), gradient);
+    cv::Mat filtred;
+    gradient(image, filtred);
     cv::imshow("image", new_im);
+    cv::imshow("filter", filtred);
     cv::imshow("original", image);
 
     while (cv::waitKey(10) != 27);
