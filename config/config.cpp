@@ -35,3 +35,11 @@ std::string Config::operator[](const std::string &parameter) {
     }
     return result;
 }
+
+void Config::update_from(boost::program_options::variables_map vm) {
+    for (auto el : *data) {
+        if (vm.count(el.first)) {
+            (*data)[el.first] = vm[el.first].as<std::string>();
+        }
+    }
+}
