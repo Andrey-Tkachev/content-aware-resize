@@ -12,13 +12,14 @@ namespace core {
         bool transposed;
     public:
         cv::Mat mat;
-        int cols, rows;
         MatWrp();
         MatWrp(MatWrp& other);
         MatWrp(MatWrp&& other);
         MatWrp(cv::Mat& other);
         MatWrp(cv::Mat&& other);
         MatWrp(int h, int w, int type);
+
+        MatWrp clone() const;
 
         const int width() const;
         const int hieght() const;
@@ -31,7 +32,10 @@ namespace core {
 
         void transpose();
         void set_shape(const MatWrp& other);
-        MatWrp operator() (cv::Range rowRange, cv::Range colRange) const;
+        void set_orientation(const MatWrp& other);
+        MatWrp  operator() (cv::Range rowRange, cv::Range colRange) const;
+        MatWrp& operator= (const MatWrp& other);
+        MatWrp& operator= (MatWrp&& other);
     };
 
     // Change image size to desirable
@@ -44,12 +48,12 @@ namespace core {
 
     // Remove(add) k rows of dots from(to) matrix "in"
     template <typename TFilter>
-    void remove_rows(const cv::Mat& in, cv::Mat& out, int k, const TFilter& filter);
+    void remove_rows(const MatWrp& in, MatWrp& out, int k, const TFilter& filter);
     template <typename TFilter>
-    void    add_rows(const cv::Mat& in, cv::Mat& out, int k, const TFilter& filter);
+    void    add_rows(const MatWrp& in, MatWrp& out, int k, const TFilter& filter);
 
-    void remove_row(PVec& points, MatWrp& from, MatWrp& to);
-    void    add_row(PVec& points, MatWrp& from, MatWrp& to);
+    void remove_row(PVec& points, MatWrp& from);
+    void    add_row(PVec& points, MatWrp& from);
 
     template <typename TFilter>
     PVec low_energy_path(const MatWrp& in, const TFilter& filter);
