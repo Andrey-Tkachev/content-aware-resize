@@ -7,7 +7,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "io.h"
 #include "config.h"
-#include "core.h"
 #include "interface.h"
 #include <boost/program_options.hpp>
 
@@ -16,10 +15,10 @@ namespace po = boost::program_options;
 int main(int ac, char **av) {
     po::options_description desc("Allowed options");
     desc.add_options()
-            ("help,h", "|  prints help page")
+            ("help,?", "|  prints help page")
             ("input-file,i", po::value<std::string>(), "|  path to input image")
-            ("to-width,w", po::value<int>(), "|  desirable width")
-            ("to-height,h", po::value<int>(), "|  desirable height");
+            ("width,w", po::value<int>(), "|  desirable width")
+            ("height,h", po::value<int>(), "|  desirable height");
 
     if (ac == 1) {
         std::cout << "Content aware resize. v0.43" << '\n';
@@ -46,8 +45,7 @@ int main(int ac, char **av) {
 
     auto image = in.read_image();
     if (!image.empty()) {
-        cv::imshow("image", image);
-        while (cv::waitKey(100) != 27);
+        int a = 0;
     } else {
         std::cout << "Image not found. Check image path. Passed: " << in.get_path();
     }
@@ -57,10 +55,13 @@ int main(int ac, char **av) {
     if (vm.count("output-file")) {
         out = io::bind_output(vm["output-file"].as<std::string>());
     } else {
-        out = io::bind_output(vm["input-file"].as<std::string>() + ".out");
+        out = io::bind_output(vm["input-file"].as<std::string>() + ".out.jpg");
     }
 
-    interface::process_image(in, out);
+    interface::process_image(in, out, cv::Size(vm["width"].as<int>(), vm["height"].as<int>()));
+
+    cv::imshow("in", image);
+    while (cv::waitKey(100) != 27);
 
     return 0;
 }

@@ -12,7 +12,7 @@ void gradient_xy(cv::Mat &in, cv::Mat &out, int x_ord,
     cv::convertScaleAbs(out, out);
 }
 
-void gradient(const cv::Mat& in, cv::Mat& out) {
+void gradient(const cv::Mat &in, cv::Mat &out) {
     int blur_size = 3;
     int sigma = 4;
     cv::Mat src_gray = in.clone();
@@ -30,10 +30,9 @@ int main() {
     image = cv::imread("test_images/duck_640x640.jpg", CV_LOAD_IMAGE_COLOR);
 
     cv::Mat new_im;
-    core::shrink_to_fit(image, new_im, cv::Size(640, 600), gradient);
+    core::shrink_to_fit(image, new_im, cv::Size(600, 600), gradient);
     cv::imshow("image", new_im);
     cv::imshow("original", image);
-    if (cv::waitKey()){
-        return 0;
-    }
+
+    while (cv::waitKey(10) != 27);
 }

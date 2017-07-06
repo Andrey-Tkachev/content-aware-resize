@@ -9,7 +9,7 @@
 //typedef Filter;
 
 namespace interface {
-    void process_image(io::Input in, io::Output out);
+    void process_image(io::Input in, io::Output out, cv::Size size);
 
     //Filter *build_filters();
 
