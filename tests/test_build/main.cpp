@@ -30,7 +30,7 @@ int main() {
     image = cv::imread("test_images/duck_640x640.jpg", CV_LOAD_IMAGE_COLOR);
 
     cv::Mat new_im;
-    core::shrink_to_fit(image, new_im, cv::Size(540, 640), gradient);
+    core::shrink_to_fit(image, new_im, cv::Size(640, 600), gradient);
     cv::imshow("image", new_im);
     cv::imshow("original", image);
     if (cv::waitKey()){

@@ -8,7 +8,7 @@ find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
 
 enable_testing()
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 include_directories(include)
 
