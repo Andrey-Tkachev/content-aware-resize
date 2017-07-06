@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <boost/program_options/variables_map.hpp>
 #include "singleton.h"
 
 class Config : public Singleton<Config> {
@@ -24,6 +25,8 @@ public:
 //private:
     std::unique_ptr<std::map<std::string, std::string>> data;
     void parse_config();
+
+    void update_from(boost::program_options::variables_map vm);
 };
 
 
