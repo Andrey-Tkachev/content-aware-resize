@@ -53,12 +53,15 @@ namespace core {
 
         for (int curr_col = 1; curr_col < in.width(); ++curr_col) {
             for (int curr_row = offset; curr_row < offset + window_size; ++curr_row) {
-                    PixelData curr_min = dynamics.at<PixelData>(curr_row, curr_col - 1) + in.at<WeightData>(curr_row, curr_col);
+                    PixelData curr_min = dynamics.at<PixelData>(curr_row, curr_col - 1) +
+                                         static_cast<PixelData> (in.at<WeightData>(curr_row, curr_col));
                 for (int delta = -1; delta <= 1; delta += 2) {
                     if (delta + curr_row < in.height() && delta + curr_row >= 0) {
-                        if (curr_min > in.at<PixelData>(curr_col, curr_row) +
+                        int t = in.mat.type();
+                        int t1 = dynamics.mat.type();
+                        if (curr_min > static_cast<PixelData> (in.at<WeightData>(curr_row, curr_col)) +
                                        dynamics.at<PixelData>(curr_row + delta, curr_col - 1)) {
-                            curr_min = in.at<PixelData>(curr_row, curr_col) +
+                            curr_min = static_cast<PixelData> (in.at<WeightData>(curr_row, curr_col)) +
                                        dynamics.at<PixelData>(curr_row + delta, curr_col - 1);
                         }
                     }
@@ -71,8 +74,10 @@ namespace core {
     PVec low_energy_path(const MatWrp& in, const MatWrp& grad, double quality) {
         MatWrp dynamics;
         dynamics.set_shape(grad);
-        int window_size = static_cast<double>(in.height()) * quality;
-        int offset = static_cast<int>(xorshf96() % static_cast<unsigned long>(std::max(in.height() - window_size, 1)));
+        //int window_size = static_cast<double>(in.height()) * 1;
+        //int offset = static_cast<int>(xorshf96() % static_cast<unsigned long>(std::max(in.height() - window_size, 1)));
+        int offset = 0;
+        int window_size = grad.height();
         calc_dynamics(grad, dynamics, offset, window_size);
         PixelData min = dynamics.at<PixelData>(0, in.width() - 1);
         int min_i = 0;

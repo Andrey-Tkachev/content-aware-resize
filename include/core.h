@@ -7,16 +7,17 @@
 
 namespace core {
     class MatWrp;
+    static bool MULTYTHREAD = false;
     typedef long long PixelData;
-    typedef long long WeightData;
+    typedef uchar WeightData;
     typedef std::vector<cv::Point2i> PVec; // Pixels to add/delete
 
     // Change image size to desirable
     // shrink_to_fit of image (640 x 480) with new_size (600 x 500) returns image (600 x 480)
     template <typename TFilter>
-    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter, double quality);
+    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, TFilter filter, double quality);
     template <typename TFilter>
-    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter);
+    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, TFilter filter);
 
     // expand_to_fit of image (640 x 480) with new_size (600 x 500) returns image (640 x 500)
     template <typename TFilter>
@@ -24,7 +25,7 @@ namespace core {
 
     // Remove/add k rows to the image
     template <typename TFilter> // Class with overrided operator()
-    void remove_rows(MatWrp& in, int k, const TFilter* filter, double quality);
+    void remove_rows(MatWrp& in, int k, TFilter filter, double quality);
 
     void split_mat(const MatWrp& in, MatWrp& out1, MatWrp& out2);
     void remove_row(PVec& points, MatWrp& from);
@@ -153,11 +154,11 @@ namespace core {
 
     // Remove/add k rows to the image
     template <typename TFilter> // Class with overrided operator()
-    void remove_rows(MatWrp& in, int k, const TFilter* filter, double quality) {
+    void remove_rows(MatWrp& in, int k, TFilter filter, double quality) {
         MatWrp grad;
         grad.set_shape(in);
         for (int l = 0; l != k; ++l) {
-            (*filter)(in.mat, grad.mat);
+            filter(in.mat, grad.mat);
             PVec pixels_to_remove = low_energy_path(in, grad, quality);
             remove_row(pixels_to_remove, in);
             remove_row(pixels_to_remove, grad);
@@ -165,56 +166,80 @@ namespace core {
     }
 
     template <typename TFilter>
-    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter, double quality) {
+    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, TFilter filter, double quality) {
         cv::Size in_size = in.size();
         MatWrp in_wrp(in.clone());
-        if (in_size.height > new_size.height) {
-            MatWrp m1, m2;
-            split_mat(in_wrp, m1, m2);
-            int delta = in_size.height - new_size.height;
-            boost::thread rm_rows1(&remove_rows<TFilter>,
-                                   boost::ref(m1),
-                                   delta / 2,
-                                   &filter,
-                                   quality);
-            boost::thread rm_rows2(&remove_rows<TFilter>,
-                                   boost::ref(m2),
-                                   delta / 2 + (delta & 1),
-                                   &filter,
-                                   quality);
-            rm_rows1.join();
-            rm_rows2.join();
-            std::cout << "Horizontal shrink done\n";
-            cv::vconcat(m1.mat, m2.mat, in_wrp.mat);
+        if (MULTYTHREAD) {
+            if (in_size.height > new_size.height) {
+                MatWrp m1, m2;
+                split_mat(in_wrp, m1, m2);
+                int delta = in_size.height - new_size.height;
+                boost::thread rm_rows1(&remove_rows<TFilter>,
+                                       boost::ref(m1),
+                                       delta / 2,
+                                       filter,
+                                       quality);
+                boost::thread rm_rows2(&remove_rows<TFilter>,
+                                        boost::ref(m2),
+                                        delta / 2 + (delta % 2),
+                                        filter,
+                                        quality);ё
+                rm_rows1.join();
+                rm_rows2.join();
+                std::cout << "Vertical shrink done\n";
+                cv::vconcat(m1.mat, m2.mat, in_wrp.mat);
+            }
+            if (in_size.width > new_size.width) {
+                in_wrp.transpose();
+                MatWrp m1, m2;
+                split_mat(in_wrp, m1, m2);
 
-        }
-        if (in_size.width > new_size.width) {
-            in_wrp.transpose();
-            MatWrp m1, m2;
-            split_mat(in_wrp, m1, m2);
+                int delta = in_size.width - new_size.width;
+                boost::thread rm_rows1(&remove_rows<TFilter>,
+                                       boost::ref(in_wrp),
+                                       delta / 2,
+                                       filter,
+                                       quality);
 
-            int delta = in_wrp.height() - new_size.width;
-            boost::thread rm_rows1(&remove_rows<TFilter>,
-                                   boost::ref(m1),
-                                   delta / 2,
-                                   &filter,
-                                   quality);
+                boost::thread rm_rows2(&remove_rows<TFilter>,
+                                       boost::ref(m2),
+                                       delta / 2 + (delta % 2),
+                                       filter,
+                                       quality);
+                rm_rows1.join();
+                rm_rows2.join();
+                std::cout << "Horizontal shrink done\n";
+                cv::hconcat(m1.mat, m2.mat, in_wrp.mat);
+            }
+        } else {
+            if (in_size.height > new_size.height) {
+                int delta = in_size.height - new_size.height;
+                boost::thread rm_rows1(&remove_rows<TFilter>,
+                                       boost::ref(in_wrp),
+                                       delta,
+                                       filter,
+                                       quality);
+                rm_rows1.join();
+                std::cout << "Vertical shrink done\n";
+            }
+            if (in_size.width > new_size.width) {
+                in_wrp.transpose();
+                int delta = in_size.width - new_size.width;
+                boost::thread rm_rows1(&remove_rows<TFilter>,
+                                       boost::ref(in_wrp),
+                                       delta,
+                                       filter,
+                                       quality);
 
-            boost::thread rm_rows2(&remove_rows<TFilter>,
-                                   boost::ref(m2),
-                                   delta / 2 + (delta & 1),
-                                   &filter,
-                                   quality);
-            rm_rows1.join();
-            rm_rows2.join();
-            std::cout << "Vertical shrink done\n";
-            cv::hconcat(m1.mat, m2.mat, in_wrp.mat);
+                rm_rows1.join();
+                std::cout << "Horizontal shrink done\n";
+            }
         }
         out = in_wrp.mat;
     }
 
     template <typename TFilter>
-    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter) {
+    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, TFilter filter) {
         shrink_to_fit(in, out, new_size, filter, 1.f);
     }
 
