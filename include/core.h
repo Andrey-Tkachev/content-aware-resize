@@ -24,7 +24,7 @@ namespace core {
 
     // Remove/add k rows to the image
     template <typename TFilter> // Class with overrided operator()
-    void remove_rows(MatWrp& in, int k, const TFilter& filter, double quality);
+    void remove_rows(MatWrp& in, int k, const TFilter* filter, double quality);
 
     void split_mat(const MatWrp& in, MatWrp& out1, MatWrp& out2);
     void remove_row(PVec& points, MatWrp& from);
@@ -146,7 +146,6 @@ namespace core {
 
     MatWrp&
     MatWrp::operator= (const MatWrp& other) {
-        //this->set_shape(other);
         this->mat = other.mat;
         this->transposed = other.transposed;
         return *this;
@@ -154,13 +153,11 @@ namespace core {
 
     // Remove/add k rows to the image
     template <typename TFilter> // Class with overrided operator()
-    void remove_rows(MatWrp& in, int k, const TFilter& filter, double quality) {
+    void remove_rows(MatWrp& in, int k, const TFilter* filter, double quality) {
         MatWrp grad;
         grad.set_shape(in);
-        filter(in.mat, grad.mat);
         for (int l = 0; l != k; ++l) {
-            if (l % 50 == 0)
-                filter(in.mat, grad.mat);
+            (*filter)(in.mat, grad.mat);
             PVec pixels_to_remove = low_energy_path(in, grad, quality);
             remove_row(pixels_to_remove, in);
             remove_row(pixels_to_remove, grad);
@@ -178,12 +175,12 @@ namespace core {
             boost::thread rm_rows1(&remove_rows<TFilter>,
                                    boost::ref(m1),
                                    delta / 2,
-                                   boost::ref(filter),
+                                   &filter,
                                    quality);
             boost::thread rm_rows2(&remove_rows<TFilter>,
                                    boost::ref(m2),
-                                   delta / 2 + delta & 1,
-                                   boost::ref(filter),
+                                   delta / 2 + (delta & 1),
+                                   &filter,
                                    quality);
             rm_rows1.join();
             rm_rows2.join();
@@ -200,12 +197,13 @@ namespace core {
             boost::thread rm_rows1(&remove_rows<TFilter>,
                                    boost::ref(m1),
                                    delta / 2,
-                                   boost::ref(filter),
+                                   &filter,
                                    quality);
+
             boost::thread rm_rows2(&remove_rows<TFilter>,
                                    boost::ref(m2),
-                                   delta / 2 + delta & 1,
-                                   boost::ref(filter),
+                                   delta / 2 + (delta & 1),
+                                   &filter,
                                    quality);
             rm_rows1.join();
             rm_rows2.join();
@@ -217,7 +215,7 @@ namespace core {
 
     template <typename TFilter>
     void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter) {
-        shrink_to_fit(in, out, new_size, filter, 0.8f);
+        shrink_to_fit(in, out, new_size, filter, 1.f);
     }
 
     template <typename TFilter>

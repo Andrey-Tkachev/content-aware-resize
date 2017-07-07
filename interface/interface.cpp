@@ -14,29 +14,32 @@ namespace interface {
         int scale = 1;
         int delta = 0;
         int ddepth = CV_16S;
-        int ker_size = 3;
+        int ker_size = 5;
         cv::Sobel(in, out, ddepth, x_ord, y_ord, ker_size, scale, delta, cv::BORDER_DEFAULT);
         cv::convertScaleAbs(out, out);
     }
 
     void gradient(const cv::Mat &in, cv::Mat &out) {
-        int blur_size = 3;
-        int sigma = 4;
+        int sigma = 3;
+        int edgeThresh = 1;
+        int lowThreshold = 30;
+        int const max_lowThreshold = 100;
+        int ratio = 3;
+        int kernel_size = 3;
         cv::Mat src_gray = in.clone();
         cvtColor(src_gray, src_gray, CV_BGR2GRAY);
-        cv::GaussianBlur(src_gray, src_gray, cv::Size(blur_size, blur_size), sigma, sigma,
-                         cv::BORDER_DEFAULT);
-        cv::Mat grad_x, grad_y;
-        gradient_xy(src_gray, grad_x, 1, 0);
-        gradient_xy(src_gray, grad_y, 0, 1);
-        addWeighted(grad_x, 0.5, grad_y, 0.5, 0, out);
+        cv::blur(src_gray, src_gray, cv::Size(sigma, sigma));
+        cv::Canny(src_gray, src_gray, lowThreshold, lowThreshold*ratio, kernel_size);
+        //cv::imshow("grad", src_gray);
+        //cv::waitKey();
+        out = src_gray;
     }
 
-    void process_image(io::Input in, io::Output out, cv::Size size) {
+    void process_image(io::Input in, io::Output out, cv::Size size, double quality) {
         Config &config = Singleton<Config>::Instance();
         cv::Mat input_matrix = in.read_image();
         cv::Mat output_matrix = in.read_image();
-        core::shrink_to_fit(input_matrix, output_matrix, size, gradient);
+        core::shrink_to_fit(input_matrix, output_matrix, size, gradient, quality);
         out.write_image(output_matrix);
         cv::imshow("out", output_matrix);
     }
