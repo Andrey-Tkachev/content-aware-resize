@@ -1,2 +1,5 @@
 set(CORE_SOURCE core.cpp)
+find_package(Boost COMPONENTS thread REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
 add_library(CORE SHARED ${CORE_SOURCE} )
+target_link_libraries(CORE ${Boost_LIBRARIES})

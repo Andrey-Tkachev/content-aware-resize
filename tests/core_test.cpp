@@ -14,15 +14,15 @@ BOOST_AUTO_TEST_CASE(Constructor) {
         cv::Mat origin(3, 5, CV_64FC1);
         core::MatWrp wrap(origin);
         BOOST_CHECK_EQUAL(wrap.width(), 5);
-        BOOST_CHECK_EQUAL(wrap.hieght(), 3);
+        BOOST_CHECK_EQUAL(wrap.height(), 3);
         BOOST_CHECK_EQUAL(wrap.mat.type(), CV_64FC1);
         core::MatWrp copy_wrap(wrap);
         BOOST_CHECK_EQUAL(copy_wrap.width(), 5);
-        BOOST_CHECK_EQUAL(copy_wrap.hieght(), 3);
+        BOOST_CHECK_EQUAL(copy_wrap.height(), 3);
         BOOST_CHECK_EQUAL(copy_wrap.mat.type(), CV_64FC1);
         core::MatWrp empty(3, 5, CV_64FC1);
         BOOST_CHECK_EQUAL(empty.width(), 5);
-        BOOST_CHECK_EQUAL(empty.hieght(), 3);
+        BOOST_CHECK_EQUAL(empty.height(), 3);
         BOOST_CHECK_EQUAL(empty.mat.type(), CV_64FC1);
 
         for (int i = 0; i < 3; ++i) {
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(Shape) {
         core::MatWrp empty;
         empty.set_shape(copy);
         BOOST_CHECK_EQUAL(copy.width(), origin.rows);
-        BOOST_CHECK_EQUAL(copy.hieght(), origin.cols);
+        BOOST_CHECK_EQUAL(copy.height(), origin.cols);
         BOOST_CHECK_EQUAL(copy.mat.cols, origin.cols);
         BOOST_CHECK_EQUAL(copy.mat.rows, origin.rows);
 }
@@ -91,8 +91,8 @@ BOOST_AUTO_TEST_CASE(Range) {
         BOOST_CHECK_EQUAL(wrp_slice.mat.cols, orig_slice.cols);
         BOOST_CHECK_EQUAL(wrp_slice.mat.rows, orig_slice.rows);
         BOOST_CHECK_EQUAL(wrp_slice.width(), orig_slice.rows);
-        BOOST_CHECK_EQUAL(wrp_slice.hieght(), orig_slice.cols);
-        for (int i = 0; i < wrp_slice.hieght(); ++i) {
+        BOOST_CHECK_EQUAL(wrp_slice.height(), orig_slice.cols);
+        for (int i = 0; i < wrp_slice.height(); ++i) {
             for (int j = 0; j < wrp_slice.width(); ++j) {
                 BOOST_CHECK_EQUAL(orig_slice.at<double>(i, j), wrp_slice.at<double>(j, i));
             }
@@ -117,9 +117,9 @@ BOOST_AUTO_TEST_SUITE(RemoveTest)
         core::remove_row(dots, wrp);
 
         BOOST_CHECK_EQUAL(wrp.width(), 4);
-        BOOST_CHECK_EQUAL(wrp.hieght(), 2);
+        BOOST_CHECK_EQUAL(wrp.height(), 2);
         BOOST_CHECK_EQUAL(wrp.width(), wrp.mat.cols);
-        BOOST_CHECK_EQUAL(wrp.hieght(), wrp.mat.rows);
+        BOOST_CHECK_EQUAL(wrp.height(), wrp.mat.rows);
         BOOST_CHECK_EQUAL(wrp.at<cv::Vec3b>(1, 0).val[0], 20);
         BOOST_CHECK_EQUAL(wrp.at<cv::Vec3b>(1, 1).val[0], 11);
         BOOST_CHECK_EQUAL(wrp.at<cv::Vec3b>(0, 2).val[0], 12);
@@ -141,9 +141,9 @@ BOOST_AUTO_TEST_SUITE(RemoveTest)
         core::remove_row(dots, wrp);
         wrp.transpose();
         BOOST_CHECK_EQUAL(wrp.width(), 3);
-        BOOST_CHECK_EQUAL(wrp.hieght(), 3);
+        BOOST_CHECK_EQUAL(wrp.height(), 3);
         BOOST_CHECK_EQUAL(wrp.width(), wrp.mat.cols);
-        BOOST_CHECK_EQUAL(wrp.hieght(), wrp.mat.rows);
+        BOOST_CHECK_EQUAL(wrp.height(), wrp.mat.rows);
         BOOST_CHECK_EQUAL(wrp.at<cv::Vec3b>(1, 0).val[0], 10);
         BOOST_CHECK_EQUAL(wrp.at<cv::Vec3b>(0, 1).val[0], 2);
         BOOST_CHECK_EQUAL(wrp.at<cv::Vec3b>(1, 1).val[0], 11);
