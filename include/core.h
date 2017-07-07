@@ -7,10 +7,13 @@
 namespace core {
     class MatWrp;
     typedef long long PixelData;
+    typedef uchar WeightData;
     typedef std::vector<cv::Point2i> PVec; // Pixels to add/delete
 
     // Change image size to desirable
     // shrink_to_fit of image (640 x 480) with new_size (600 x 500) returns image (600 x 480)
+    template <typename TFilter>
+    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter, double quality);
     template <typename TFilter>
     void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter);
 
@@ -20,15 +23,14 @@ namespace core {
 
     // Remove/add k rows to the image
     template <typename TFilter> // Class with overrided operator()
-    void remove_rows(MatWrp& in, int k, const TFilter& filter);
+    void remove_rows(MatWrp& in, int k, const TFilter& filter, double quality);
 
     void remove_row(PVec& points, MatWrp& from);
-    void calc_dynamics(const MatWrp& in, MatWrp& dynamics);
+    void calc_dynamics(const MatWrp& in, MatWrp& dynamics, int offset, int windows_size);
 
 
     // Search path of pixels with min energy
-    template <typename TFilter>
-    PVec low_energy_path(const MatWrp& in, const TFilter& filter);
+    PVec low_energy_path(const MatWrp& in, const MatWrp& weight_map, double quality);
 
     class MatWrp {
      private:
@@ -56,6 +58,9 @@ namespace core {
         void set_orientation(const MatWrp& other);
         MatWrp  operator() (cv::Range rowRange, cv::Range colRange) const;
         MatWrp& operator= (const MatWrp& other);
+        ~MatWrp() {
+            //std::cout << mat.type() << "\n";
+        }
     };
 
     MatWrp::MatWrp() {
@@ -121,6 +126,11 @@ namespace core {
         this->transposed = other.transposed;
     }
 
+    void
+    MatWrp::set_orientation(const MatWrp& other) {
+        this->transposed = other.transposed;
+    }
+
     MatWrp
     MatWrp::operator() (cv::Range rowRange, cv::Range colRange)  const {
         if (this->transposed) {
@@ -135,71 +145,45 @@ namespace core {
 
     MatWrp&
     MatWrp::operator= (const MatWrp& other) {
+        //this->set_shape(other);
         this->mat = other.mat;
         this->transposed = other.transposed;
         return *this;
     }
 
-    template <typename TFilter>
-    PVec low_energy_path(const MatWrp& in, const TFilter& filter) {
+    // Remove/add k rows to the image
+    template <typename TFilter> // Class with overrided operator()
+    void remove_rows(MatWrp& in, int k, const TFilter& filter, double quality) {
         MatWrp grad;
         grad.set_shape(in);
         filter(in.mat, grad.mat);
-        MatWrp dynamics;
-        dynamics.set_shape(grad);
-        calc_dynamics(grad, dynamics);
-        PixelData min = dynamics.at<PixelData>(0, in.width() - 1);
-        int min_i = 0;
-        for (int i = 0; i < dynamics.hieght(); ++i) {
-            if (min > dynamics.at<PixelData>(i, in.width() - 1)) {
-                min = dynamics.at<PixelData>(i, in.width() - 1);
-                min_i = i;
-            }
-        }
-        int curr_row = min_i;
-        int curr_col = in.width() - 1;
-        PVec path;
-        path.emplace_back(curr_col, curr_row);
-        while (curr_col > 0) {
-            int suitable_delta = 0;
-            PixelData curr_min = 1e9;
-            for (int delta = -1; delta <= 1; ++delta) {
-                if (delta + curr_row < in.hieght() && delta + curr_row >= 0) {
-                    if (curr_min > dynamics.at<PixelData>(curr_row + delta, curr_col)) {
-                        curr_min = dynamics.at<PixelData>(curr_row + delta, curr_col);
-                        suitable_delta = delta;
-                    }
-                }
-            }
-            curr_row += suitable_delta;
-            --curr_col;
-            path.emplace_back(curr_col, curr_row);
-        }
-        return path;
-    }
-
-    // Remove/add k rows to the image
-    template <typename TFilter> // Class with overrided operator()
-    void remove_rows(MatWrp& in, int k, const TFilter& filter) {
         for (int l = 0; l != k; ++l) {
-            auto pixels_to_remove = low_energy_path(in, filter);
+            if (l % 50 == 0)
+                filter(in.mat, grad.mat);
+            PVec pixels_to_remove = low_energy_path(in, grad, quality);
             remove_row(pixels_to_remove, in);
+            remove_row(pixels_to_remove, grad);
         }
     }
 
     template <typename TFilter>
-    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter) {
+    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter, double quality) {
         cv::Size in_size = in.size();
         MatWrp in_wrp(in.clone());
         MatWrp out_wrp;
         if (in_size.height > new_size.height) {
-            remove_rows(in_wrp, in_size.height - new_size.height, filter);
+            remove_rows(in_wrp, in_size.height - new_size.height, filter, quality);
         }
         if (in_size.width > new_size.width) {
             in_wrp.transpose();
-            remove_rows(in_wrp, in_size.width - new_size.width, filter);
+            remove_rows(in_wrp, in_size.width - new_size.width, filter, quality);
         }
         out = in_wrp.mat;
+    }
+
+    template <typename TFilter>
+    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter) {
+        shrink_to_fit(in, out, new_size, filter, 1.f);
     }
 
     template <typename TFilter>

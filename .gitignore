@@ -41,3 +41,6 @@ cmake-build-*
 
 # CLion
 .idea/*
+
+# Test Data
+*.jpg

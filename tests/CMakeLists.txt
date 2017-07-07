@@ -11,4 +11,4 @@ target_link_libraries(${TCore} CORE ${OpenCV_LIBS} ${Boost_LIBRARIES})
 add_test(${TCore} ${TCore})
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
 
-add_subdirectory(test_build)
+#add_subdirectory(test_build)
