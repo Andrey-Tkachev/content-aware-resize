@@ -9,7 +9,7 @@ namespace core {
     class MatWrp;
     static bool MULTYTHREAD = false;
     typedef long long PixelData;
-    typedef uchar WeightData;
+    typedef long long WeightData;
     typedef std::vector<cv::Point2i> PVec; // Pixels to add/delete
 
     // Change image size to desirable
@@ -183,7 +183,7 @@ namespace core {
                                         boost::ref(m2),
                                         delta / 2 + (delta % 2),
                                         filter,
-                                        quality);ё
+                                        quality);
                 rm_rows1.join();
                 rm_rows2.join();
                 std::cout << "Vertical shrink done\n";

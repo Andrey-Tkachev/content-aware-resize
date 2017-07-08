@@ -74,10 +74,8 @@ namespace core {
     PVec low_energy_path(const MatWrp& in, const MatWrp& grad, double quality) {
         MatWrp dynamics;
         dynamics.set_shape(grad);
-        //int window_size = static_cast<double>(in.height()) * 1;
-        //int offset = static_cast<int>(xorshf96() % static_cast<unsigned long>(std::max(in.height() - window_size, 1)));
-        int offset = 0;
-        int window_size = grad.height();
+        int window_size = static_cast<double>(in.height()) * quality;
+        int offset = static_cast<int>(xorshf96() % static_cast<unsigned long>(std::max(in.height() - window_size, 1)));
         calc_dynamics(grad, dynamics, offset, window_size);
         PixelData min = dynamics.at<PixelData>(0, in.width() - 1);
         int min_i = 0;
@@ -95,7 +93,7 @@ namespace core {
             int suitable_delta = 0;
             PixelData curr_min = dynamics.at<PixelData>(curr_row, curr_col);
             for (int delta = -1; delta <= 1; ++delta, ++delta) {
-                if (delta + curr_row < in.height() && delta + curr_row >= 0) {
+                if (delta + curr_row < offset + window_size && delta + curr_row >= 0) {
                     if (curr_min > dynamics.at<PixelData>(curr_row + delta, curr_col)) {
                         curr_min = dynamics.at<PixelData>(curr_row + delta, curr_col);
                         suitable_delta = delta;
