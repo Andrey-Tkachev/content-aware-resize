@@ -14,9 +14,9 @@ public:
     }
 
 protected:
-    Singleton(){};
+    Singleton() {};
 
-    ~Singleton(){};
+    ~Singleton() {};
 
 public:
     Singleton(Singleton const &) = delete;

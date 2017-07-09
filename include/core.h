@@ -23,21 +23,26 @@ namespace core {
         bool transposed;
     public:
         cv::Mat mat;
+
         MatWrp();
-        MatWrp(const MatWrp& other);
-        MatWrp(const cv::Mat& other);
+
+        MatWrp(const MatWrp &other);
+
+        MatWrp(const cv::Mat &other);
+
         MatWrp(int h, int w, int type);
 
         MatWrp clone() const;
 
         const int width() const;
+
         const int height() const;
 
-        template <typename T>
-        T& at(int i, int j);
+        template<typename T>
+        T &at(int i, int j);
 
-        template <typename T>
-        const T& at(int i, int j) const;
+        template<typename T>
+        const T &at(int i, int j) const;
 
         void transpose();
         void set_shape(const MatWrp& other);
@@ -49,15 +54,15 @@ namespace core {
     template <typename TData>
     TData&
     MatWrp::at(int i, int j) {
-        return ((this->transposed) ? (this->mat).at<TData> (j, i) :
-                (this->mat).at<TData> (i, j)); // Hello, opencv index style
+        return ((this->transposed) ? (this->mat).at<TData>(j, i) :
+                (this->mat).at<TData>(i, j)); // Hello, opencv index style
     }
 
-    template <typename TData>
-    const TData&
+    template<typename TData>
+    const TData &
     MatWrp::at(int i, int j) const {
-        return ((this->transposed) ? (this->mat).at<TData> (j, i) :
-                (this->mat).at<TData> (i, j)); // Hello, opencv index style
+        return ((this->transposed) ? (this->mat).at<TData>(j, i) :
+                (this->mat).at<TData>(i, j)); // Hello, opencv index style
     }
 
     std::vector<Seem> get_seems(MatWrp& energy, int k);
@@ -73,8 +78,8 @@ namespace core {
         remove_seems(in, seems);
     }
 
-    template <typename TFilter>
-    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, TFilter filter, double quality) {
+    template<typename TFilter>
+    void shrink_to_fit(const cv::Mat &in, cv::Mat &out, const cv::Size &new_size, TFilter filter, double quality) {
         cv::Size in_size = in.size();
         MatWrp in_wrp(in.clone());
 

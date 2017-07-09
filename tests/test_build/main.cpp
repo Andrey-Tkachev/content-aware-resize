@@ -35,7 +35,6 @@ int main() {
     core::shrink_to_fit(image, new_im, cv::Size(400, 450), gradient);
     cv::Mat filtred;
     gradient(image, filtred);
-
     cv::imshow("image", new_im);
     cv::imshow("filter", filtred);
     cv::imshow("original", image);

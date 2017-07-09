@@ -85,6 +85,7 @@ namespace core {
             for (int curr_col = 0; curr_col < in.width(); ++curr_col) {
                 WeightData curr_min = dynamics.at<WeightData>(curr_row + 1, curr_col) +
                                       in.at<EnergyData>(curr_row + 1, curr_col);
+
                 for (int delta = -1; delta <= 1; delta += 2) {
                     if (delta + curr_col < in.width() && delta + curr_col >= 0) {
                         if (curr_min > dynamics.at<WeightData>(curr_row + 1, curr_col + delta) +
