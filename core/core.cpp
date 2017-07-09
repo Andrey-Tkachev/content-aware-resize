@@ -1,106 +1,206 @@
 #include "core.h"
 #include <opencv2/opencv.hpp>
+#include <climits>
 
 namespace core {
-    static unsigned long _x=123456789, _y=362436069, _z=521288629;
-
-    unsigned long xorshf96(void) {          //period 2^96-1
-        unsigned long t;
-        _x ^= _x << 16;
-        _x ^= _x >> 5;
-        _x ^= _x << 1;
-
-        t = _x;
-        _x = _y;
-        _y = _z;
-        _z = t ^ _x ^ _y;
-
-        return _z;
+    MatWrp::MatWrp() {
+        this->mat = cv::Mat();
+        this->transposed = false;
     }
 
-    void split_mat(const MatWrp& in, MatWrp& out1, MatWrp& out2) {
-        out1 = in(cv::Range(0, in.height() / 2), cv::Range(0, in.width()));
-        out2 = in(cv::Range(in.height() / 2, in.height()), cv::Range(0, in.width()));
+    MatWrp::MatWrp(const MatWrp& other) {
+        this->mat = other.mat;
+        this->transposed = other.transposed;
     }
 
-    void remove_row(PVec& points, MatWrp& from) {
-        for (int i = 0; i != from.width(); ++i) {
-            int delta = -1;
-            for (int j = points[i].y + 1; j != from.height(); ++j) {
-                switch (from.mat.type()) {
-                    case CV_64F:
-                        from.at<double>(j + delta, i) = from.at<double>(j, i);
-                        break;
+    MatWrp::MatWrp(const cv::Mat& other) {
+        this->mat = other;
+        this->transposed = false;
+    }
 
-                    case CV_8UC1:
-                        from.at<uchar>(j + delta, i) = from.at<uchar>(j, i);
-                        break;
+    MatWrp::MatWrp(int h, int w, int type=CV_64F) {
+        this->mat.create(h, w, type);
+        this->transposed = false;
+    }
 
-                    case CV_8UC3:
-                    default:
-                        from.at<cv::Vec3b>(j + delta, i) = from.at<cv::Vec3b>(j, i);
-                        break;
-                }
-            }
+    MatWrp
+    MatWrp::clone() const {
+        MatWrp cl((this->mat).clone());
+        cl.transposed = this->transposed;
+        return cl;
+    }
+    const
+    int MatWrp::width() const {
+        return ((this->transposed) ? this->mat.rows :
+                this->mat.cols);
+    }
+
+    const
+    int MatWrp::height() const {
+        return ((this->transposed) ? this->mat.cols :
+                this->mat.rows);
+    }
+
+    void
+    MatWrp::transpose() {
+        this->transposed ^= 1;
+    }
+
+    void
+    MatWrp::set_shape(const MatWrp& other) {
+        this->mat.create(other.mat.rows, other.mat.cols, CV_64F);
+        this->transposed = other.transposed;
+    }
+
+    void
+    MatWrp::set_orientation(const MatWrp& other) {
+        this->transposed = other.transposed;
+    }
+
+    MatWrp
+    MatWrp::operator() (cv::Range rowRange, cv::Range colRange)  const {
+        if (this->transposed) {
+            std::swap(rowRange, colRange);
         }
-        from = from(cv::Range(0, from.height() - 1), cv::Range(0, from.width())).clone();
+        MatWrp copy((this->mat)(rowRange, colRange));
+        if (this->transposed) {
+            copy.transpose();
+        }
+        return copy;
     }
 
-    void calc_dynamics(const MatWrp& in, MatWrp& dynamics, int offset, int window_size) {
-        for (int i = offset; i < offset + window_size; ++i) {
-            dynamics.at<PixelData>(i, 0) = in.at<PixelData>(i, 0);
+    MatWrp&
+    MatWrp::operator= (const MatWrp& other) {
+        //this->set_shape(other);
+        this->mat = other.mat;
+        this->transposed = other.transposed;
+        return *this;
+    }
+
+    void calc_optimum_dynamics(const MatWrp& in, MatWrp& dynamics) {
+        for (int i = 0; i < in.width(); ++i) {
+            dynamics.at<WeightData>(in.height() - 1, i) = in.at<EnergyData>(in.height() - 1, i);
         }
 
-        for (int curr_col = 1; curr_col < in.width(); ++curr_col) {
-            for (int curr_row = offset; curr_row < offset + window_size; ++curr_row) {
-                    PixelData curr_min = dynamics.at<PixelData>(curr_row, curr_col - 1) + in.at<WeightData>(curr_row, curr_col);
+        for (int curr_row = in.height() - 2; curr_row >= 0; --curr_row) {
+            for (int curr_col = 0; curr_col < in.width(); ++curr_col) {
+                WeightData curr_min = dynamics.at<WeightData>(curr_row + 1, curr_col) +
+                                      in.at<EnergyData>(curr_row + 1, curr_col);
                 for (int delta = -1; delta <= 1; delta += 2) {
-                    if (delta + curr_row < in.height() && delta + curr_row >= 0) {
-                        if (curr_min > in.at<PixelData>(curr_col, curr_row) +
-                                       dynamics.at<PixelData>(curr_row + delta, curr_col - 1)) {
-                            curr_min = in.at<PixelData>(curr_row, curr_col) +
-                                       dynamics.at<PixelData>(curr_row + delta, curr_col - 1);
+                    if (delta + curr_col < in.width() && delta + curr_col >= 0) {
+                        if (curr_min > dynamics.at<WeightData>(curr_row + 1, curr_col + delta) +
+                                       in.at<EnergyData>(curr_row, curr_col)) {
+                            curr_min = dynamics.at<WeightData>(curr_row + 1, curr_col + delta) +
+                                       in.at<EnergyData>(curr_row, curr_col);
                         }
                     }
                 }
-                dynamics.at<PixelData>(curr_row, curr_col) = curr_min;
+                dynamics.at<WeightData>(curr_row, curr_col) = curr_min;
             }
         }
     }
 
-    PVec low_energy_path(const MatWrp& in, const MatWrp& grad, double quality) {
-        MatWrp dynamics;
-        dynamics.set_shape(grad);
-        int window_size = static_cast<double>(in.height()) * quality;
-        int offset = static_cast<int>(xorshf96() % static_cast<unsigned long>(std::max(in.height() - window_size, 1)));
-        calc_dynamics(grad, dynamics, offset, window_size);
-        PixelData min = dynamics.at<PixelData>(0, in.width() - 1);
-        int min_i = 0;
-        for (int i = offset; i < offset + window_size; ++i) {
-            if (min > dynamics.at<PixelData>(i, in.width() - 1)) {
-                min = dynamics.at<PixelData>(i, in.width() - 1);
-                min_i = i;
-            }
+    WeightData get_w(MatWrp& optimum_energy, MatWrp& seem_energy, int i, int j, int row) {
+        return seem_energy.at<WeightData>(row, i) * optimum_energy.at<WeightData>(row + 1, j);
+    }
+
+    bool seem_comparator(std::pair<WeightData, Seem>& it1, std::pair<WeightData, Seem>& it2) {
+        return it1.first < it2.first;
+    }
+
+    std::vector<Seem>
+    get_seems(MatWrp& energy, int k) {
+        MatWrp seem_energy;
+        seem_energy.set_shape(energy);
+
+        MatWrp optimum_energy;
+        optimum_energy.set_shape(energy);
+        calc_optimum_dynamics(energy, optimum_energy);
+
+        MatWrp prev;
+        prev.set_shape(energy);
+        for (int i = 0; i < energy.width(); ++i) {
+            prev.at<long long>(0, i) = -1;
+            seem_energy.at<WeightData>(0, i) = energy.at<EnergyData>(0, i);
         }
-        int curr_row = min_i;
-        int curr_col = in.width() - 1;
-        PVec path;
-        path.emplace_back(curr_col, curr_row);
-        while (curr_col > 0) {
-            int suitable_delta = 0;
-            PixelData curr_min = dynamics.at<PixelData>(curr_row, curr_col);
-            for (int delta = -1; delta <= 1; ++delta, ++delta) {
-                if (delta + curr_row < in.height() && delta + curr_row >= 0) {
-                    if (curr_min > dynamics.at<PixelData>(curr_row + delta, curr_col)) {
-                        curr_min = dynamics.at<PixelData>(curr_row + delta, curr_col);
-                        suitable_delta = delta;
-                    }
+
+        for (int row = 0; row < energy.height() - 1; ++row) {
+            std::vector<WeightData> matches(energy.width());
+            matches[0] = get_w(optimum_energy, seem_energy, 0, 0, row);
+            matches[1] = std::max(matches[0] + get_w(optimum_energy, seem_energy, 1, 1, row),
+                                  get_w(optimum_energy, seem_energy, 0, 1, row) +
+                                  get_w(optimum_energy, seem_energy, 1, 0, row));
+            for (int col = 2; col < energy.width(); ++col) {
+                WeightData w1 = matches[col - 1] + get_w(optimum_energy, seem_energy, col, col, row);
+                WeightData w2 = matches[col - 2] + get_w(optimum_energy, seem_energy, col, col - 1, row) +
+                                                 + get_w(optimum_energy, seem_energy, col - 1, col, row);
+                matches[col] = std::max(w1, w2);
+            }
+            int x = energy.width() - 1;
+            while (x >= 0) {
+                WeightData last_match = (x == 0 ? 0 : matches[x - 1]);
+                if (matches[x] == last_match + get_w(optimum_energy, seem_energy, x, x, row)) {
+                    prev.at<long long> (row + 1, x) = x;
+                    seem_energy.at<WeightData>(row + 1, x) = seem_energy.at<WeightData>(row, x) +
+                                                             energy.at<EnergyData>(row + 1, x);
+                    --x;
+                } else {
+                    prev.at<long long> (row + 1, x) = x - 1;
+                    prev.at<long long> (row + 1, x - 1) = x;
+                    seem_energy.at<WeightData>(row + 1, x - 1) = seem_energy.at<WeightData>(row, x) +
+                                                                 energy.at<EnergyData>(row + 1, x - 1);
+                    seem_energy.at<WeightData>(row + 1, x) = seem_energy.at<WeightData>(row, x - 1) +
+                                                                 energy.at<EnergyData>(row + 1, x);
+                    x -= 2;
                 }
             }
-            curr_row += suitable_delta;
-            --curr_col;
-            path.emplace_back(curr_col, curr_row);
         }
-        return path;
+        std::vector<Seem> seems(energy.width());
+        for (int i = 0; i < energy.width(); ++i) {
+            int curr = i;
+            int curr_row = energy.height() - 1;
+            while (curr != -1) {
+                seems[i].emplace_back(curr, curr_row);
+                curr = prev.at<long long> (curr_row, curr);
+                --curr_row;
+            }
+        }
+        std::vector<std::pair<WeightData, Seem>> weighted_seems;
+        for (int i = 0; i != seems.size(); ++i) {
+            weighted_seems.push_back(std::make_pair(seem_energy.at<WeightData>(energy.height() - 1, i),
+                                                    seems[i]));
+        }
+        std::sort(weighted_seems.begin(), weighted_seems.end(), seem_comparator);
+        std::vector<Seem> res;
+        for (int i = 0; i < k; ++i) {
+            res.push_back(weighted_seems[i].second);
+        }
+
+        return res;
+    }
+
+    bool point_comparator(cv::Point2i& p1, cv::Point2i& p2) {
+        return p1.x < p2.x;
+    }
+
+    void remove_seems(MatWrp& from, std::vector<Seem>& seems) {
+        for (int row = from.height() - 1; row >= 0; --row) {
+            Seem pool;
+            for (auto seem : seems) {
+                pool.push_back(seem[from.height() - row - 1]);
+            }
+            std::sort(pool.begin(), pool.end(), point_comparator);
+            int delta = 0;
+            int curr_pix = 0;
+            for (int col = 0; col < from.width(); ++col) {
+                if (curr_pix < pool.size() && col == pool[curr_pix].x) {
+                    ++curr_pix;
+                    delta -= 1;
+                    continue;
+                }
+                from.at<cv::Vec3b>(row, col + delta) = from.at<cv::Vec3b>(row, col);
+            }
+        }
+        from = from(cv::Range(0, from.height()), cv::Range(0, from.width() - seems.size())).clone();
     }
 }
