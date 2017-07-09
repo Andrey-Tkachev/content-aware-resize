@@ -6,9 +6,10 @@
 #include "io.h"
 #include "config.h"
 #include "core.h"
+#include "filters.h"
 
 namespace interface {
-    //TODO: replace filters
+    /*
     void gradient_xy(cv::Mat &in, cv::Mat &out, int x_ord,
                      int y_ord) {
         int scale = 1;
@@ -29,19 +30,35 @@ namespace interface {
         cv::Mat src_gray = in.clone();
         cvtColor(src_gray, src_gray, CV_BGR2GRAY);
         cv::blur(src_gray, src_gray, cv::Size(sigma, sigma));
-        cv::Canny(src_gray, src_gray, lowThreshold, lowThreshold*ratio, kernel_size);
+        cv::Canny(src_gray, src_gray, lowThreshold, lowThreshold * ratio, kernel_size);
         //cv::imshow("grad", src_gray);
         //cv::waitKey();
         out = src_gray;
     }
+    */
 
-    void process_image(io::Input in, io::Output out, cv::Size size, double quality) {
+
+    filter::Compose build_filters() {
+        filter::GrayScale *gs = new filter::GrayScale();
+        filter::Blur *blur = new filter::Blur(/*sigma = */ 3);
+        filter::Canny *canny = new filter::Canny(/*low_threshold = */ 30, /*ratio = */ 3, /*kernel_size = */ 3);
+        std::vector<filter::Filter *> filters = {gs, blur, canny};
+        filter::Compose compose(filters);
+        return compose;
+    }
+
+
+    void process_image(io::Input in, io::Output out, cv::Size size, bool show_images, double quality) {
         Config &config = Singleton<Config>::Instance();
+
         cv::Mat input_matrix = in.read_image();
         cv::Mat output_matrix = in.read_image();
-        core::shrink_to_fit(input_matrix, output_matrix, size, gradient, quality);
+
+        auto filter = build_filters();
+
+        core::shrink_to_fit(input_matrix, output_matrix, size, filter, quality);
+
         out.write_image(output_matrix);
-        cv::imshow("out", output_matrix);
     }
 
 }

@@ -8,7 +8,9 @@
 #include <fstream>
 #include "config.h"
 
-Config::Config() :data(new std::map<std::string, std::string>()){
+namespace po = boost::program_options;
+
+Config::Config() : data(new std::map<std::string, std::string>()) {
     parse_config();
 }
 
@@ -36,10 +38,19 @@ std::string Config::operator[](const std::string &parameter) {
     return result;
 }
 
-void Config::update_from(boost::program_options::variables_map vm) {
-    for (auto el : *data) {
-        if (vm.count(el.first)) {
-            (*data)[el.first] = vm[el.first].as<std::string>();
-        }
+void Config::update_from(const po::variables_map &vm) {
+    //TODO: rewrite config subsystem
+    /*for (const auto &el : vm) {
+        (*data)[el.first] = boost::any_cast<std::string>(&el.second);
+    }*/
+}
+
+void Config::print() {
+    std::cout << "====================\n"
+              << "CURRENT CONFIG:\n";
+    for (const auto &el : *data) {
+        std::cout << el.first << " -- " << el.second << '\n';
     }
+    std::cout << "====================\n";
+
 }

@@ -9,60 +9,67 @@
 #include "config.h"
 #include "interface.h"
 #include <boost/program_options.hpp>
+#include "useful_funcitons_RENAME.cpp"
 
 namespace po = boost::program_options;
 
-int main(int ac, char **av) {
-    po::options_description desc("Allowed options");
-    desc.add_options()
-            ("help,?", "|  prints help page")
-            ("input-file,i", po::value<std::string>(), "|  path to input image")
-            ("width,w", po::value<int>(), "|  desirable width")
-            ("height,h", po::value<int>(), "|  desirable height")
-            ("quality,q", po::value<double>(), "|  desirable quality in (0, 1]");
-
-    if (ac == 1) {
-        std::cout << "Content aware resize. v0.43" << '\n';
-        std::cout << desc << '\n';
-        return 0;
-    }
-    po::variables_map vm;
-    po::store(po::command_line_parser(ac, av).options(desc).run(), vm);
-    po::notify(vm);
-
+int main(int argc, char **argv) {
     Config &config = Singleton<Config>::Instance();
-    config.update_from(vm);
-
-    if (vm.count("help")) {
-        std::cout << "Content aware resize. v0.43" << '\n';
-        std::cout << desc << '\n';
+    po::variables_map vm;
+    try {
+        vm = process_arguments(argc, argv);
+    } catch (...) {
         return 0;
     }
+
+    //config.update_from(vm);
 
     io::Input in;
+    io::Output out;
+
     if (vm.count("input-file")) {
         in = io::bind_input(vm["input-file"].as<std::string>());
+    } else {
+        std::cerr << "No input file providen!\n";
+        return -1;
     }
 
     auto image = in.read_image();
-    if (!image.empty()) {
-        int a = 0;
-    } else {
-        std::cout << "Image not found. Check image path. Passed: " << in.get_path();
+    if (image.empty()) {
+        std::cerr << "No image found! Passed: \"" << in.get_path() << "\".";
+        return -1;
     }
 
+    int height = 0, width = 0;
 
-    io::Output out;
+    if (vm.count("height")) {
+        height = vm["height"].as<int>();
+    } else {
+        std::cerr << "No height providen!\n";
+    }
+    if (vm.count("width")) {
+        width = vm["width"].as<int>();
+    } else {
+        std::cerr << "No width providen!\n";
+    }
+
     if (vm.count("output-file")) {
         out = io::bind_output(vm["output-file"].as<std::string>());
     } else {
         out = io::bind_output(vm["input-file"].as<std::string>() + ".out.jpg");
     }
 
-    interface::process_image(in, out, cv::Size(vm["width"].as<int>(), vm["height"].as<int>()), vm["quality"].as<double>());
+    bool show_images = vm.count("show-images") ? vm["show-images"].as<bool>() : false;
+    double quality = vm.count("quality") ? vm["quality"].as<double>() : 1;
 
-    cv::imshow("in", image);
-    while (cv::waitKey(100) != 27);
+    interface::process_image(in, out, cv::Size(width, height),
+                             show_images, quality);
 
+
+    if (vm["show-images"].as<bool>()) {
+        cv::namedWindow("in", cv::WINDOW_NORMAL);
+        cv::imshow("in", image);
+        while (cv::waitKey(100) != 27);
+    }
     return 0;
 }

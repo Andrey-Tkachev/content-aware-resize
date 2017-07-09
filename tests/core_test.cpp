@@ -10,7 +10,7 @@
 
 BOOST_AUTO_TEST_SUITE(MatWrapperTest)
 
-BOOST_AUTO_TEST_CASE(Constructor) {
+    BOOST_AUTO_TEST_CASE(Constructor) {
         cv::Mat origin(3, 5, CV_64FC1);
         core::MatWrp wrap(origin);
         BOOST_CHECK_EQUAL(wrap.width(), 5);
@@ -38,11 +38,11 @@ BOOST_AUTO_TEST_CASE(Constructor) {
         }
     }
 
-BOOST_AUTO_TEST_CASE(Transpose) {
+    BOOST_AUTO_TEST_CASE(Transpose) {
         cv::Mat origin(3, 5, CV_64FC1);
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 5; ++j) {
-                 origin.at<double>(i, j) = 10 * i + j;
+                origin.at<double>(i, j) = 10 * i + j;
             }
         }
         core::MatWrp wrp(origin);
@@ -63,21 +63,21 @@ BOOST_AUTO_TEST_CASE(Transpose) {
                 BOOST_CHECK_EQUAL(origin.at<double>(i, j), copy.at<double>(j, i));
             }
         }
-}
+    }
 
-BOOST_AUTO_TEST_CASE(Shape) {
+    BOOST_AUTO_TEST_CASE(Shape) {
         cv::Mat origin(3, 5, CV_64FC1);
-            core::MatWrp copy(origin);
-            copy.transpose();
+        core::MatWrp copy(origin);
+        copy.transpose();
         core::MatWrp empty;
         empty.set_shape(copy);
         BOOST_CHECK_EQUAL(copy.width(), origin.rows);
         BOOST_CHECK_EQUAL(copy.height(), origin.cols);
         BOOST_CHECK_EQUAL(copy.mat.cols, origin.cols);
         BOOST_CHECK_EQUAL(copy.mat.rows, origin.rows);
-}
+    }
 
-BOOST_AUTO_TEST_CASE(Range) {
+    BOOST_AUTO_TEST_CASE(Range) {
         cv::Mat origin(3, 5, CV_64FC1);
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 5; ++j) {
@@ -97,16 +97,17 @@ BOOST_AUTO_TEST_CASE(Range) {
                 BOOST_CHECK_EQUAL(orig_slice.at<double>(i, j), wrp_slice.at<double>(j, i));
             }
         }
-}
+    }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(RemoveTest)
+
     BOOST_AUTO_TEST_CASE(RemoveRow) {
         cv::Mat origin(3, 4, CV_64FC1);
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 4; ++j) {
-                origin.at<cv::Vec3b>(i, j) = cv::Vec3b((uchar)(10 * i + j), 0, 0);
+                origin.at<cv::Vec3b>(i, j) = cv::Vec3b((uchar) (10 * i + j), 0, 0);
             }
         }
         core::MatWrp wrp(origin);
@@ -130,7 +131,7 @@ BOOST_AUTO_TEST_SUITE(RemoveTest)
         cv::Mat origin(3, 4, CV_64FC1);
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 4; ++j) {
-                origin.at<cv::Vec3b>(i, j) = cv::Vec3b((uchar)(10 * i + j), 0, 0);
+                origin.at<cv::Vec3b>(i, j) = cv::Vec3b((uchar) (10 * i + j), 0, 0);
             }
         }
         core::MatWrp wrp(origin);
@@ -149,4 +150,5 @@ BOOST_AUTO_TEST_SUITE(RemoveTest)
         BOOST_CHECK_EQUAL(wrp.at<cv::Vec3b>(1, 1).val[0], 11);
         BOOST_CHECK_EQUAL(wrp.at<cv::Vec3b>(2, 2).val[0], 23);
     }
+
 BOOST_AUTO_TEST_SUITE_END()
