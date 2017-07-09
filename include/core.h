@@ -7,9 +7,16 @@
 
 namespace core {
     class MatWrp;
+
     typedef long long WeightData;
     typedef uchar EnergyData;
     typedef std::vector<cv::Point2i> Seem; // Path to add/remove along
+
+    // Shrinks width and height of the in image to сorrespond with desirable size
+    // image 640x640, new size 500x700 -> new image 500x640
+    // image 640x640, new size 500x500 -> new image 500x500 etc.
+    template <typename TFilter>
+    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, TFilter filter, double quality);
 
     class MatWrp {
     private:
@@ -67,12 +74,14 @@ namespace core {
     }
 
     template <typename TFilter>
-    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter, double quality) {
+    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, TFilter filter, double quality) {
         cv::Size in_size = in.size();
         MatWrp in_wrp(in.clone());
+
         shrink(in_wrp, in_size.width - new_size.width, filter);
         in_wrp.transpose();
         shrink(in_wrp, in_size.height - new_size.height, filter);
+
         out = in_wrp.mat;
     }
 

@@ -71,7 +71,6 @@ namespace core {
 
     MatWrp&
     MatWrp::operator= (const MatWrp& other) {
-        //this->set_shape(other);
         this->mat = other.mat;
         this->transposed = other.transposed;
         return *this;
@@ -155,6 +154,7 @@ namespace core {
                 }
             }
         }
+
         std::vector<Seem> seems(energy.width());
         for (int i = 0; i < energy.width(); ++i) {
             int curr = i;

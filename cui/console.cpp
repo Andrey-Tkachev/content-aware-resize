@@ -18,7 +18,8 @@ int main(int ac, char **av) {
             ("help,?", "|  prints help page")
             ("input-file,i", po::value<std::string>(), "|  path to input image")
             ("width,w", po::value<int>(), "|  desirable width")
-            ("height,h", po::value<int>(), "|  desirable height");
+            ("height,h", po::value<int>(), "|  desirable height")
+            ("quality,q", po::value<double>(), "|  desirable quality in (0, 1]");
 
     if (ac == 1) {
         std::cout << "Content aware resize. v0.43" << '\n';
@@ -58,7 +59,7 @@ int main(int ac, char **av) {
         out = io::bind_output(vm["input-file"].as<std::string>() + ".out.jpg");
     }
 
-    interface::process_image(in, out, cv::Size(vm["width"].as<int>(), vm["height"].as<int>()));
+    interface::process_image(in, out, cv::Size(vm["width"].as<int>(), vm["height"].as<int>()), vm["quality"].as<double>());
 
     cv::imshow("in", image);
     while (cv::waitKey(100) != 27);
