@@ -12,11 +12,11 @@ namespace core {
     typedef uchar EnergyData;
     typedef std::vector<cv::Point2i> Seem; // Path to add/remove along
 
-    // Shrinks width and height of the in image to сorrespond with desirable size
-    // image 640x640, new size 500x700 -> new image 500x640
+    // Shrinks/expands width and height of the in image to сorrespond with desirable size
+    // image 640x640, new size 500x700 -> new image 500x700
     // image 640x640, new size 500x500 -> new image 500x500 etc.
     template <typename TFilter>
-    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, TFilter filter, double quality);
+    void resize_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, TFilter filter);
 
     class MatWrp {
     private:
@@ -34,6 +34,9 @@ namespace core {
 
         MatWrp clone() const;
 
+
+        bool is_transposed() const;
+        
         const int width() const;
 
         const int height() const;
@@ -46,6 +49,7 @@ namespace core {
 
         void transpose();
         void set_shape(const MatWrp& other);
+        void set_shape(const MatWrp& other,int type);
         void set_orientation(const MatWrp& other);
         MatWrp  operator() (cv::Range rowRange, cv::Range colRange) const;
         MatWrp& operator= (const MatWrp& other);
@@ -67,32 +71,31 @@ namespace core {
 
     std::vector<Seem> get_seems(MatWrp& energy, int k);
     void remove_seems(MatWrp& from, std::vector<Seem>& seems);
+    void add_seems(MatWrp& from, std::vector<Seem>& seems);
 
     template <typename TFilter>
-    void shrink(MatWrp& in, int delta, const TFilter& filter) {
-        if (delta <= 0) return;
+    void resize(MatWrp& in, int delta, const TFilter& filter) {
         MatWrp energy;
         energy.set_orientation(in);
         filter(in.mat, energy.mat);
-        auto seems = get_seems(energy, delta);
-        remove_seems(in, seems);
+        auto seems = get_seems(energy, std::abs(delta));
+        if (delta > 0) {
+            remove_seems(in, seems);
+        } else if (delta < 0) {
+            add_seems(in, seems);
+        }
     }
 
     template<typename TFilter>
-    void shrink_to_fit(const cv::Mat &in, cv::Mat &out, const cv::Size &new_size, TFilter filter, double quality) {
+    void resize_to_fit(const cv::Mat &in, cv::Mat &out, const cv::Size &new_size, TFilter filter) {
         cv::Size in_size = in.size();
         MatWrp in_wrp(in.clone());
 
-        shrink(in_wrp, in_size.width - new_size.width, filter);
+        resize(in_wrp, in_size.width - new_size.width, filter);
         in_wrp.transpose();
-        shrink(in_wrp, in_size.height - new_size.height, filter);
+        resize(in_wrp, in_size.height - new_size.height, filter);
 
         out = in_wrp.mat;
-    }
-
-    template <typename TFilter>
-    void shrink_to_fit(const cv::Mat& in, cv::Mat& out, const cv::Size& new_size, const TFilter& filter) {
-        shrink_to_fit(in, out, new_size, filter, 1.f);
     }
 }
 

@@ -42,13 +42,20 @@ namespace interface {
         filter::GrayScale *gs = new filter::GrayScale();
         filter::Blur *blur = new filter::Blur(/*sigma = */ 3);
         filter::Canny *canny = new filter::Canny(/*low_threshold = */ 30, /*ratio = */ 3, /*kernel_size = */ 3);
+
+        // filter::Sobel *sobel_x = new filter::Sobel(/*x = */ 1, /*y = */ 0, /* size = */ 3,
+        //                                                                   /*sc = */ 1,
+        //                                                                   /*del = */  0,
+        //                                                                   /*ddepth = */  IPL_DEPTH_16S,
+        //                                                                   /*bT = */ cv::BORDER_DEFAULT);
+
         std::vector<filter::Filter *> filters = {gs, blur, canny};
         filter::Compose compose(filters);
         return compose;
     }
 
 
-    void process_image(io::Input in, io::Output out, cv::Size size, bool show_images, double quality) {
+    void process_image(io::Input in, io::Output out, cv::Size size, bool show_images) {
         Config &config = Singleton<Config>::Instance();
 
         cv::Mat input_matrix = in.read_image();
@@ -56,7 +63,7 @@ namespace interface {
 
         auto filter = build_filters();
 
-        core::shrink_to_fit(input_matrix, output_matrix, size, filter, quality);
+        core::resize_to_fit(input_matrix, output_matrix, size, filter);
 
         out.write_image(output_matrix);
     }

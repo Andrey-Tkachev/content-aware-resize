@@ -60,10 +60,9 @@ int main(int argc, char **argv) {
     }
 
     bool show_images = vm.count("show-images") ? vm["show-images"].as<bool>() : false;
-    double quality = vm.count("quality") ? vm["quality"].as<double>() : 1;
 
     interface::process_image(in, out, cv::Size(width, height),
-                             show_images, quality);
+                             show_images);
 
 
     if (vm["show-images"].as<bool>()) {

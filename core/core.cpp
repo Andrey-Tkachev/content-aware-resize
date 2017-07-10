@@ -41,6 +41,11 @@ namespace core {
                 this->mat.rows);
     }
 
+    bool
+    MatWrp::is_transposed() const {
+        return transposed;
+    }
+
     void
     MatWrp::transpose() {
         this->transposed ^= 1;
@@ -49,6 +54,12 @@ namespace core {
     void
     MatWrp::set_shape(const MatWrp& other) {
         this->mat.create(other.mat.rows, other.mat.cols, CV_64F);
+        this->transposed = other.transposed;
+    }
+
+    void
+    MatWrp::set_shape(const MatWrp& other, int type) {
+        this->mat.create(other.mat.rows, other.mat.cols, type);
         this->transposed = other.transposed;
     }
 
@@ -182,6 +193,32 @@ namespace core {
 
     bool point_comparator(cv::Point2i& p1, cv::Point2i& p2) {
         return p1.x < p2.x;
+    }
+
+    void add_seems(MatWrp& from, std::vector<Seem>& seems) {
+        int delta = seems.size();
+        MatWrp out(from.mat.rows + (from.is_transposed() ? delta : 0),
+                   from.mat.cols + (from.is_transposed() ? 0 : delta), from.mat.type());
+        out.set_orientation(from);
+        for (int row = from.height() - 1; row >= 0; --row) {
+            Seem pool;
+            for (auto seem : seems) {
+                pool.push_back(seem[from.height() - row - 1]);
+            }
+            std::sort(pool.begin(), pool.end(), point_comparator);
+            int delta = 0;
+            int curr_pix = 0;
+            for (int col = 0; col < from.width(); ++col) {
+                out.at<cv::Vec3b>(row, col + delta) = from.at<cv::Vec3b>(row, col);
+                if (curr_pix < pool.size() && col == pool[curr_pix].x) {
+                    ++curr_pix;
+                    delta += 1;
+                    out.at<cv::Vec3b>(row, col + delta) = from.at<cv::Vec3b>(row, col);
+                    continue;
+                }
+            }
+        }
+        from = out;
     }
 
     void remove_seems(MatWrp& from, std::vector<Seem>& seems) {
