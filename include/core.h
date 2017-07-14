@@ -1,6 +1,5 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
-#include <boost/thread.hpp>
 
 #ifndef CONTENTAWARERESIZE_CORE_H
 #define CONTENTAWARERESIZE_CORE_H

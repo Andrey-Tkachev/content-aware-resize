@@ -9,7 +9,7 @@ find_package(Boost REQUIRED)
 
 enable_testing()
 set(CMAKE_BUILD_TYPE Release)
-
+set(CMAKE_CXX_STANDARD 14)
 include_directories(include)
 
 add_subdirectory(config)
@@ -19,3 +19,4 @@ add_subdirectory(interface)
 add_subdirectory(utils)
 add_subdirectory(tests)
 add_subdirectory(cui)
+add_subdirectory(gui)
