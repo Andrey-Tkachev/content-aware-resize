@@ -1,0 +1,8 @@
+//
+// Created by nikita on 15.07.17.
+//
+
+#ifndef CONTENTAWARERESIZE_TYPES_H
+#define CONTENTAWARERESIZE_TYPES_H
+
+#endif //CONTENTAWARERESIZE_TYPES_H
