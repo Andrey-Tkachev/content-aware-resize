@@ -115,7 +115,7 @@ namespace core {
         return seem_energy.at<WeightData>(row, i) * optimum_energy.at<WeightData>(row + 1, j);
     }
 
-    bool seem_comparator(std::pair<WeightData, Seem>& it1, std::pair<WeightData, Seem>& it2) {
+    bool seem_comparator(std::pair<WeightData, Seem*>& it1, std::pair<WeightData, Seem*>& it2) {
         return it1.first < it2.first;
     }
 
@@ -128,11 +128,11 @@ namespace core {
         optimum_energy.set_shape(energy);
         calc_optimum_dynamics(energy, optimum_energy);
 
-        MatWrp prev;
-        prev.set_shape(energy);
+        std::vector<Seem*> seems(energy.width());
         for (int i = 0; i < energy.width(); ++i) {
-            prev.at<long long>(0, i) = -1;
             seem_energy.at<WeightData>(0, i) = energy.at<EnergyData>(0, i);
+            seems[i] = new Seem();
+            seems[i]->emplace_back(0, i);
         }
 
         for (int row = 0; row < energy.height() - 1; ++row) {
@@ -151,13 +151,14 @@ namespace core {
             while (x >= 0) {
                 WeightData last_match = (x == 0 ? 0 : matches[x - 1]);
                 if (matches[x] == last_match + get_w(optimum_energy, seem_energy, x, x, row)) {
-                    prev.at<long long> (row + 1, x) = x;
+                    seems[x]->emplace_back(x, row + 1);
                     seem_energy.at<WeightData>(row + 1, x) = seem_energy.at<WeightData>(row, x) +
                                                              energy.at<EnergyData>(row + 1, x);
                     --x;
                 } else {
-                    prev.at<long long> (row + 1, x) = x - 1;
-                    prev.at<long long> (row + 1, x - 1) = x;
+                    seems[x - 1]->emplace_back(x, row + 1);
+                    seems[x]->emplace_back(x - 1, row + 1);
+                    std::swap(seems[x], seems[x - 1]);
                     seem_energy.at<WeightData>(row + 1, x - 1) = seem_energy.at<WeightData>(row, x) +
                                                                  energy.at<EnergyData>(row + 1, x - 1);
                     seem_energy.at<WeightData>(row + 1, x) = seem_energy.at<WeightData>(row, x - 1) +
@@ -167,17 +168,7 @@ namespace core {
             }
         }
 
-        std::vector<Seem> seems(energy.width());
-        for (int i = 0; i < energy.width(); ++i) {
-            int curr = i;
-            int curr_row = energy.height() - 1;
-            while (curr != -1) {
-                seems[i].emplace_back(curr, curr_row);
-                curr = prev.at<long long> (curr_row, curr);
-                --curr_row;
-            }
-        }
-        std::vector<std::pair<WeightData, Seem>> weighted_seems;
+        std::vector<std::pair<WeightData, Seem*>> weighted_seems;
         for (int i = 0; i != seems.size(); ++i) {
             weighted_seems.push_back(std::make_pair(seem_energy.at<WeightData>(energy.height() - 1, i),
                                                     seems[i]));
@@ -185,7 +176,7 @@ namespace core {
         std::sort(weighted_seems.begin(), weighted_seems.end(), seem_comparator);
         std::vector<Seem> res;
         for (int i = 0; i < k; ++i) {
-            res.push_back(weighted_seems[i].second);
+            res.emplace_back(std::move(*weighted_seems[i].second));
         }
 
         return res;
@@ -196,13 +187,13 @@ namespace core {
     }
 
     void add_seems(MatWrp& from, std::vector<Seem>& seems) {
-        int delta = seems.size();
-        MatWrp out(from.mat.rows + (from.is_transposed() ? delta : 0),
-                   from.mat.cols + (from.is_transposed() ? 0 : delta), from.mat.type());
+        int w_delta = static_cast<int> (seems.size());
+        MatWrp out(from.mat.rows + (from.is_transposed() ? w_delta : 0),
+                   from.mat.cols + (from.is_transposed() ? 0 : w_delta), from.mat.type());
         out.set_orientation(from);
-        for (int row = from.height() - 1; row >= 0; --row) {
+        for (int row = 0; row < from.height(); ++row) {
             Seem pool;
-            for (auto seem : seems) {
+            for (const auto& seem : seems) {
                 pool.push_back(seem[from.height() - row - 1]);
             }
             std::sort(pool.begin(), pool.end(), point_comparator);
@@ -222,10 +213,10 @@ namespace core {
     }
 
     void remove_seems(MatWrp& from, std::vector<Seem>& seems) {
-        for (int row = from.height() - 1; row >= 0; --row) {
+        for (int row = 0; row < from.height(); ++row) {
             Seem pool;
-            for (auto seem : seems) {
-                pool.push_back(seem[from.height() - row - 1]);
+            for (const auto& seem : seems) {
+                pool.push_back(seem[row]);
             }
             std::sort(pool.begin(), pool.end(), point_comparator);
             int delta = 0;
