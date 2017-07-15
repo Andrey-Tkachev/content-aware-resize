@@ -193,7 +193,7 @@ namespace core {
         out.set_orientation(from);
         for (int row = 0; row < from.height(); ++row) {
             Seem pool;
-            for (auto seem : seems) {
+            for (const auto& seem : seems) {
                 pool.push_back(seem[from.height() - row - 1]);
             }
             std::sort(pool.begin(), pool.end(), point_comparator);
@@ -215,7 +215,7 @@ namespace core {
     void remove_seems(MatWrp& from, std::vector<Seem>& seems) {
         for (int row = 0; row < from.height(); ++row) {
             Seem pool;
-            for (auto seem : seems) {
+            for (const auto& seem : seems) {
                 pool.push_back(seem[row]);
             }
             std::sort(pool.begin(), pool.end(), point_comparator);
