@@ -1,67 +1,12 @@
-#ifndef IMAGEVIEWER_H
-#define IMAGEVIEWER_H
+#pragma once
 
 #include <QMainWindow>
 #include <QImage>
-#include <QLabel>
-#include <QResizeEvent>
-#include <iostream>
-#include <opencv2/opencv.hpp>
 
-#include "core.h"
-#include "filters.h"
-
-QImage Mat2QImage(cv::Mat const& src)
-{
-    //cv::Mat temp; // make the same cv::Mat
-    //cvtColor(src, temp,CV_BGR2RGB); // cvtColor Makes a copt, that what i need
-    auto temp = src;
-    QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-    dest.bits(); // enforce deep copy, see documentation
-    // of QImage::QImage ( const uchar * data, int width, int height, Format format )
-    return dest;
-}
-
-cv::Mat QImage2Mat(QImage const& src)
-{
-    cv::Mat tmp(src.height(),src.width(),CV_8UC3,(uchar*)src.bits(),src.bytesPerLine());
-    cv::Mat result; // deep copy just in case (my lack of knowledge with open cv)
-    //cvtColor(tmp, result,CV_BGR2RGB);
-    cvtColor(tmp, result, CV_RGB2BGR);
-    cvtColor(result, result, CV_BGR2RGB);
-    return result;
-}
+#include "resizable_label.h"
 
 class QAction;
 class QMenu;
-class ResizableQLabel : public QLabel
-{
-    public:
-        cv::Mat image_cv;
-    void resizeEvent(QResizeEvent* event){
-        if (image_cv.cols == 0) {
-            QLabel::resizeEvent(event);
-            return;
-        }
-        const QSize ns = event->size();
-        cv::Mat out;
-
-        filter::GrayScale *gs = new filter::GrayScale();
-        filter::Blur *blur = new filter::Blur(/*sigma = */ 3);
-        filter::Canny *canny = new filter::Canny(/*low_threshold = */ 30, /*ratio = */ 3, /*kernel_size = */ 3);
-        std::vector<filter::Filter *> filters = {gs, blur, canny};
-        filter::Compose compose(filters);
-
-        core::resize_to_fit(image_cv, out, cv::Size(ns.width(), ns.height()), compose);
-        QPixmap pmp = QPixmap::fromImage(Mat2QImage(out));
-        QLabel::setPixmap(pmp);
-        QLabel::resizeEvent(event);
-    }
-    void setPixmap(const QPixmap &pixmap) {
-        this->image_cv = QImage2Mat(pixmap.toImage().convertToFormat(QImage::Format_RGB888));
-        QLabel::setPixmap(pixmap);
-    }
-};
 
 class ImageViewer : public QMainWindow
 {
@@ -92,5 +37,3 @@ private:
     QAction *saveAsAct;
     QAction *copyAct;
 };
-
-#endif

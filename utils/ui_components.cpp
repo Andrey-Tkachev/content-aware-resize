@@ -1,9 +1,49 @@
 
 #include <QtWidgets>
-#include "imageviewer.h"
 #include <opencv2/opencv.hpp>
-#include "core.h"
-#include <iostream>
+
+#include "resizable_label.h"
+#include "imageviewer.h"
+
+
+QImage Mat2QImage(cv::Mat const& src) {
+    auto temp = src;
+    QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+    dest.bits(); // enforce deep copy, see documentation
+    // of QImage::QImage ( const uchar * data, int width, int height, Format format )
+    return dest;
+}
+
+cv::Mat QImage2Mat(QImage const& src) {
+    cv::Mat tmp(src.height(),src.width(),CV_8UC3,(uchar*)src.bits(),src.bytesPerLine());
+    cv::Mat result; // deep copy just in case (my lack of knowledge with open cv)
+    cvtColor(tmp, result, CV_RGB2BGR);
+    cvtColor(result, result, CV_BGR2RGB);
+    return result;
+}
+
+ResizableQLabel::ResizableQLabel() {}
+
+void
+ResizableQLabel::resizeEvent(QResizeEvent* event){
+    if (!resizer.is_init()) {
+        return;
+    }
+    const QSize ns = event->size();
+    cv::Mat out;
+
+    resizer.process(out, cv::Size(ns.width(), ns.height()));
+    QPixmap pmp = QPixmap::fromImage(Mat2QImage(out));
+    QLabel::setPixmap(pmp);
+    QLabel::resizeEvent(event);
+}
+
+void
+ResizableQLabel::setPixmap(const QPixmap &pixmap) {
+    this->resizer.init(QImage2Mat(pixmap.toImage().convertToFormat(QImage::Format_RGB888)));
+    QLabel::setPixmap(pixmap);
+}
+
 
 ImageViewer::ImageViewer()
     : imageLabel(new ResizableQLabel)
@@ -14,7 +54,7 @@ ImageViewer::ImageViewer()
     setCentralWidget(imageLabel);
 
     createActions();
-    resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
+    resize(QGuiApplication::primaryScreen()->availableSize() / 2);
 }
 
 
@@ -45,8 +85,6 @@ void ImageViewer::setImage(const QImage &newImage)
     imageLabel->setPixmap(QPixmap::fromImage(image));
     this->resize(newImage.size());
     updateActions();
-
-    std::cout << "Set image\n";
 }
 
 
@@ -143,19 +181,9 @@ void ImageViewer::paste()
 
 void ImageViewer::about()
 {
-    QMessageBox::about(this, tr("About Image Viewer"),
-                       tr("<p>The <b>Image Viewer</b> example shows how to combine QLabel "
-                              "and QScrollArea to display an image. QLabel is typically used "
-                              "for displaying a text, but it can also display an image. "
-                              "QScrollArea provides a scrolling view around another widget. "
-                              "If the child widget exceeds the size of the frame, QScrollArea "
-                              "automatically provides scroll bars. </p><p>The example "
-                              "demonstrates how QLabel's ability to scale its contents "
-                              "(QLabel::scaledContents), and QScrollArea's ability to "
-                              "automatically resize its contents "
-                              "(QScrollArea::widgetResizable), can be used to implement "
-                              "zooming and scaling features. </p><p>In addition the example "
-                              "shows how to use QPainter to print an image.</p>"));
+    QMessageBox::about(this, tr("About UXinar"),
+                       tr("<p>The <b>UXinar</b> is an implementation of realtime Content Aware Resize algorithm. "
+                                  "It has a huge variety of setting to deal with.</p>"));
 }
 
 void ImageViewer::createActions()

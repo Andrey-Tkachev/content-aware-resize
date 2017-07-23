@@ -9,6 +9,7 @@
 #include "config.h"
 #include "interface.h"
 #include <boost/program_options.hpp>
+#include "utils.h"
 #include "useful_funcitons_RENAME.cpp"
 
 namespace po = boost::program_options;
@@ -21,8 +22,12 @@ int main(int argc, char **argv) {
     } catch (...) {
         return 0;
     }
-
     //config.update_from(vm);
+
+    if (vm.count("DEBUG")) {
+        run_debug_code();
+        return 0;
+    }
 
     io::Input in;
     io::Output out;
@@ -39,6 +44,7 @@ int main(int argc, char **argv) {
         std::cerr << "No image found! Passed: \"" << in.get_path() << "\".";
         return -1;
     }
+
 
     int height = 0, width = 0;
 
@@ -59,16 +65,9 @@ int main(int argc, char **argv) {
         out = io::bind_output(vm["input-file"].as<std::string>() + ".out.jpg");
     }
 
-    bool show_images = vm.count("show-images") ? vm["show-images"].as<bool>() : false;
 
     interface::process_image(in, out, cv::Size(width, height),
-                             show_images);
+                             false);
 
-
-    if (vm["show-images"].as<bool>()) {
-        cv::namedWindow("in", cv::WINDOW_NORMAL);
-        cv::imshow("in", image);
-        while (cv::waitKey(100) != 27);
-    }
     return 0;
 }

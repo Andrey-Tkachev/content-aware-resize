@@ -1,9 +1,4 @@
-//
-// Created by nikita on 05.07.17.
-//
-
-#ifndef CONTENTAWARERESIZE_IO_H
-#define CONTENTAWARERESIZE_IO_H
+#pragma once
 
 #include <boost/program_options.hpp>
 #include <opencv2/core/mat.hpp>
@@ -50,6 +45,3 @@ namespace io {
 
     boost::program_options::variables_map parse_console_arguments(int ac, char **av);
 }
-
-
-#endif //CONTENTAWARERESIZE_IO_H

@@ -1,8 +1,7 @@
-//
-// Created by nikita on 15.07.17.
-//
+#pragma once
 
-#ifndef CONTENTAWARERESIZE_TYPES_H
-#define CONTENTAWARERESIZE_TYPES_H
+typedef long long WeightData;
+typedef uchar EnergyData;
+typedef std::vector<cv::Point2i> seam; // Path to add/remove along
 
-#endif //CONTENTAWARERESIZE_TYPES_H
+typedef std::vector<seam*> Seams;
