@@ -1,5 +1,12 @@
-set(SINGLETON_TEMPLATE_SOURCE singleton.cpp ../include/singleton.h)
-set(IO_SOURCE io.cpp ../include/io.h)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Core REQUIRED)
 
-add_library(SINGLETON_TEMPLATE SHARED ${SINGLETON_TEMPLATE_SOURCE})
-add_library(IO_LIB SHARED ${IO_SOURCE})
+set(CMAKE_AUTOMOC ON)
+
+add_library(SINGLETON_TEMPLATE SHARED radix.cpp)
+add_library(IO_LIB SHARED io.cpp)
+add_library(UTILS_LIB SHARED singleton.cpp)
+add_library(IMVIEWER SHARED ui_components.cpp)
+
+target_link_libraries(IMVIEWER Qt5::Widgets
+                               Qt5::Core)

@@ -5,6 +5,8 @@
 #pragma once
 
 #include <boost/program_options.hpp>
+#include "utils.h"
+#include <chrono>
 
 namespace po = boost::program_options;
 
@@ -19,12 +21,10 @@ po::variables_map process_arguments(int argc, char **argv) {
             ("height,h", po::value<int>(), "|  desirable height")
             ("percent,p", po::value<double>(),
              "|  change both dimensions in percent")
-            //("width-percent,wp", po::value<double>(), "|  changes width by percent")
-            //("height-percent,hp", po::value<double>(), "|  changes height by percent")
-            ("quality,q", po::value<double>()->default_value(1.)->implicit_value(1.),
-             "|  image compression quality, in range (0,1]")
-            ("show-images,s", po::value<bool>()->default_value(false)->implicit_value(true),
-             "|  show images windows while working {DEBUG}");
+            ("DEBUG", "|  DEBUG MODE")
+        //("show-images,s", po::value<bool>()->default_value(false)->implicit_value(true),
+        // "|  show images windows while working {DEBUG}")
+            ;
 
 
     po::variables_map vm;
@@ -32,7 +32,7 @@ po::variables_map process_arguments(int argc, char **argv) {
     po::notify(vm);
 
     if (argc == 1 || vm.count("help")) {
-        std::cout << "XINAR Content Aware Resize. v.50\n"
+        std::cout << "XINAR Content Aware Resize. v.56\n"
                   << desc;
         throw 0;
     }
@@ -40,4 +40,20 @@ po::variables_map process_arguments(int argc, char **argv) {
     c.update_from(vm);
 
     return vm;
+}
+
+
+void run_debug_code() {
+    std::vector<int> a, b;
+    for (int i =0 ; i != 1000 * 1000; ++i) {
+        a.push_back(rand());
+    }
+    b = a;
+    auto t0 = std::chrono::system_clock::now();
+    //utils::radix_sort(a.begin(), a.end(), [](int a) { return a; });
+    utils::radix_sort(a);
+    std::cout << "Radix sort 1.000.000 numbers: " << (std::chrono::system_clock::now() - t0).count() << '\n';
+    auto t1 = std::chrono::system_clock::now();
+    std::sort(b.begin(), b.end());
+    std::cout << "QSort 1.000.000 numbers: " << (std::chrono::system_clock::now() - t1).count();
 }

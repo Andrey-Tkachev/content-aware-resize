@@ -1,9 +1,4 @@
-//
-// Created by nikita on 07.07.17.
-//
-
-#ifndef CONTENTAWARERESIZE_FILTERS_H
-#define CONTENTAWARERESIZE_FILTERS_H
+#pragma once
 
 #include "opencv2/opencv.hpp"
 
@@ -143,6 +138,8 @@ namespace filter {
         std::vector<Filter *> fil;  // filtres
 
     public:
+        Compose() {}
+
         Compose(const std::vector<Filter *> &filters)
                 : fil(filters) {
         }
@@ -155,5 +152,3 @@ namespace filter {
         }
     };
 }
-
-#endif //CONTENTAWARERESIZE_FILTERS_H

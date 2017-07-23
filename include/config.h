@@ -1,10 +1,4 @@
-//
-// Created by nikita on 04.07.17.
-//
-
-#ifndef CONTENTAWARERESIZE_CONFIG_H
-#define CONTENTAWARERESIZE_CONFIG_H
-
+#pragma once
 
 #include <string>
 #include <map>
@@ -35,6 +29,3 @@ public:
 
     void print();
 };
-
-
-#endif //CONTENTAWARERESIZE_CONFIG_H
