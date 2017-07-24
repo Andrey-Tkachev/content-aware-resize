@@ -5,7 +5,7 @@
 namespace filter {
     class Filter {
     public:
-        virtual void operator()(cv::Mat src, cv::Mat &dst) const = 0;
+        virtual void operator()(cv::Mat& src, cv::Mat &dst) const = 0;
 
         virtual ~Filter() {}
     };
@@ -21,7 +21,7 @@ namespace filter {
     public:
         GausBlur(cv::Size size, double X, double Y, int borT);
 
-        void operator()(cv::Mat src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat &dst) const override;
 
         cv::Size getKsize();
 
@@ -55,7 +55,7 @@ namespace filter {
         Sobel(int x, int y, int size, double sc, double del, int ddepth,
               int bT);
 
-        void operator()(cv::Mat src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat &dst) const override;
 
         int getXord();
 
@@ -96,7 +96,7 @@ namespace filter {
     public:
         Canny(int low_threshold, int ratio, int kernel_size);
 
-        void operator()(cv::Mat src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat &dst) const override;
 
         int getLowThreshold();
 
@@ -119,7 +119,7 @@ namespace filter {
     public:
         Blur(int sigma);
 
-        void operator()(cv::Mat src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat &dst) const override;
 
         int getSigma();
 
@@ -130,7 +130,7 @@ namespace filter {
     public:
         GrayScale();
 
-        void operator()(cv::Mat src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat &dst) const override;
     };
 
     class Compose : public Filter {
@@ -144,7 +144,7 @@ namespace filter {
                 : fil(filters) {
         }
 
-        void operator()(cv::Mat src, cv::Mat &dst) const override {
+        void operator()(cv::Mat& src, cv::Mat &dst) const override {
             dst = src.clone();
             for (auto filter : fil) {
                 (*filter)(dst, dst);

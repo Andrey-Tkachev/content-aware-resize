@@ -13,7 +13,7 @@ namespace interface {
         filter::GrayScale *gs = new filter::GrayScale();
         filter::Blur *blur = new filter::Blur(/*sigma = */ 3);
         filter::Canny *canny = new filter::Canny(/*low_threshold = */ 30, /*ratio = */ 3, /*kernel_size = */ 3);
-
+        filter::Sobel *sbl = new filter::Sobel(0, 0, 3, 1, 0, CV_16S, cv::BORDER_DEFAULT);
         std::vector<filter::Filter *> filters = {gs, blur, canny};
         filter::Compose compose(filters);
         return compose;
@@ -30,6 +30,7 @@ namespace interface {
 
     void
     Resize::init(cv::Mat&& in) {
+        for (auto seam : vseams) delete seam;
         image = core::MatWrp(in);
         cv::Mat energy;
         filter(in, energy);

@@ -1,3 +1,5 @@
+### About
+This is an implementation of the [real time content aware resize](https://link.springer.com/article/10.1007/s11432-009-0041-9) algorithm.
 Project consist from console and gui applications (xinar and uxinar respectively) which provide resize services.
 
 ### Dependencies
@@ -38,3 +40,4 @@ Just run *uxinar* as executable and choose file to resize in the file menu.
 * **CUI, GUI** -- console and graphics applications implementation respectively
 
 Copyright [Andery Tkachev](https://github.com/Andrey-Tkachev), [Nikita Orlov](https://github.com/acerikfy), Dmitriy Malygin, 2017.
+

@@ -18,7 +18,7 @@ namespace filter {
         bt = borT;
     }
 
-    void GausBlur::operator()(cv::Mat src, cv::Mat &dst) const {
+    void GausBlur::operator()(cv::Mat& src, cv::Mat &dst) const {
         cv::GaussianBlur(src, dst, ksize, sX, sY, bt);
     }
 
@@ -60,21 +60,24 @@ namespace filter {
     /*##################################*/
 
 
-    Sobel::Sobel(int x, int y, int size = 3, double sc = 1, double del = 0, int ddepth = IPL_DEPTH_16S,
+    Sobel::Sobel(int x, int y, int size = 3, double sc = 1, double del = 0, int ddepth = CV_16S,
                  int bT = cv::BORDER_DEFAULT) {
         xord = x;
         yord = y;
         ksize = size;
         scale = sc;
         delta = del;
-        ddepth = IPL_DEPTH_16S;
+        ddepth = CV_16S;
         bt = bT;
     }
 
-    void Sobel::operator()(cv::Mat src, cv::Mat &dst) const {
-        cv::Mat dst16 = cv::Mat(src.size(), ddepth, src.channels());
-        cv::Sobel(src, dst16, ddepth, xord, yord, ksize, scale, delta, bt);
-        dst16.convertTo(dst, dst.depth());
+    void Sobel::operator()(cv::Mat& src, cv::Mat &dst) const {
+        cv::Mat grad_x, grad_y;
+        cv::Sobel(src, grad_x, ddepth, 1, 0, ksize, scale, delta, cv::BORDER_DEFAULT);
+        cv::convertScaleAbs(grad_x, grad_x);
+        cv::Sobel(src, grad_y, ddepth, 0, 1, ksize, scale, delta, cv::BORDER_DEFAULT);
+        cv::convertScaleAbs(grad_y, grad_y);
+        addWeighted(grad_x, 0.5, grad_y, 0.5, 0, dst);
     }
 
     int Sobel::getXord() {
@@ -143,7 +146,7 @@ namespace filter {
         kernel_size = kernel_size_;
     }
 
-    void Canny::operator()(cv::Mat src, cv::Mat &dst) const {
+    void Canny::operator()(cv::Mat& src, cv::Mat &dst) const {
         cv::Canny(src, dst, low_threshold, low_threshold * ratio, kernel_size);
     }
 
@@ -180,7 +183,7 @@ namespace filter {
         this->sigma = sigma;
     }
 
-    void Blur::operator()(cv::Mat src, cv::Mat &dst) const {
+    void Blur::operator()(cv::Mat& src, cv::Mat &dst) const {
         cv::blur(src, dst, cv::Size(sigma, sigma));
     }
 
@@ -198,7 +201,7 @@ namespace filter {
 
     GrayScale::GrayScale() {}
 
-    void GrayScale::operator()(cv::Mat src, cv::Mat &dst) const {
+    void GrayScale::operator()(cv::Mat& src, cv::Mat &dst) const {
         cvtColor(src, dst, CV_BGR2GRAY);
     }
 }

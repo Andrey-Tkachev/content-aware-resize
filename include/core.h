@@ -20,6 +20,7 @@ namespace core {
 
     template <typename TFilter>
     void resize_with_filter(MatWrp& in, int delta, const TFilter& filter) {
+        if (delta == 0) return;
         MatWrp energy;
         energy.set_orientation(in);
         filter(in.mat, energy.mat);
@@ -28,6 +29,9 @@ namespace core {
             remove_seams(in, seams);
         } else if (delta < 0) {
             add_seams(in, seams);
+        }
+        for (auto seam : seams) {
+            delete seam;
         }
     }
 

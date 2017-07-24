@@ -8,10 +8,7 @@
 class QAction;
 class QMenu;
 
-class ImageViewer : public QMainWindow
-{
-    //Q_OBJECT
-
+class ImageViewer : public QMainWindow {
 public:
     ImageViewer();
     bool loadFile(const QString &);

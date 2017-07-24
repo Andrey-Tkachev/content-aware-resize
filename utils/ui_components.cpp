@@ -1,7 +1,6 @@
 
 #include <QtWidgets>
 #include <opencv2/opencv.hpp>
-
 #include "resizable_label.h"
 #include "imageviewer.h"
 
@@ -15,7 +14,7 @@ QImage Mat2QImage(cv::Mat const& src) {
 }
 
 cv::Mat QImage2Mat(QImage const& src) {
-    cv::Mat tmp(src.height(),src.width(),CV_8UC3,(uchar*)src.bits(),src.bytesPerLine());
+    cv::Mat tmp(src.height(),src.width(), CV_8UC3,(uchar*)src.bits(),src.bytesPerLine());
     cv::Mat result; // deep copy just in case (my lack of knowledge with open cv)
     cvtColor(tmp, result, CV_RGB2BGR);
     cvtColor(result, result, CV_BGR2RGB);
@@ -31,7 +30,6 @@ ResizableQLabel::resizeEvent(QResizeEvent* event){
     }
     const QSize ns = event->size();
     cv::Mat out;
-
     resizer.process(out, cv::Size(ns.width(), ns.height()));
     QPixmap pmp = QPixmap::fromImage(Mat2QImage(out));
     QLabel::setPixmap(pmp);
@@ -54,7 +52,7 @@ ImageViewer::ImageViewer()
     setCentralWidget(imageLabel);
 
     createActions();
-    resize(QGuiApplication::primaryScreen()->availableSize() / 2);
+    resize(QGuiApplication::primaryScreen()->availableSize() / 3);
 }
 
 
@@ -82,8 +80,8 @@ bool ImageViewer::loadFile(const QString &fileName)
 void ImageViewer::setImage(const QImage &newImage)
 {
     image = newImage;
+    this->resize(QSize(newImage.width(), newImage.height() + this->menuBar()->height() + this->statusBar()->height()));
     imageLabel->setPixmap(QPixmap::fromImage(image));
-    this->resize(newImage.size());
     updateActions();
 }
 
@@ -182,7 +180,7 @@ void ImageViewer::paste()
 void ImageViewer::about()
 {
     QMessageBox::about(this, tr("About UXinar"),
-                       tr("<p>The <b>UXinar</b> is an implementation of realtime Content Aware Resize algorithm. "
+                             tr("<p>The <b>UXinar</b> is an implementation of realtime Content Aware Resize algorithm. "
                                   "It has a huge variety of setting to deal with.</p>"));
 }
 
@@ -209,10 +207,6 @@ void ImageViewer::createActions()
 
     QAction *pasteAct = editMenu->addAction(tr("&Paste"), this, &ImageViewer::paste);
     pasteAct->setShortcut(QKeySequence::Paste);
-
-    QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
-
-    viewMenu->addSeparator();
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
 
