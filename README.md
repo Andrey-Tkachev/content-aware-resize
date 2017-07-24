@@ -23,9 +23,9 @@ via GUI.
 
 Console usage example:
 
-shrink image example.jpg to 600 by 600 pixels
+To resize image example_640x540.jpg to 600 by 600 pixels
 ```
-:~$ ./xinar -i example.jpg -w 600 -h 600
+:~$ ./xinar -i  example_640x540.jpg -w 600 -h 600
 ```
 All commands are available via ``` -? ``` (```--help```) flag.
 
@@ -36,8 +36,8 @@ Just run *uxinar* as executable and choose file to resize in the file menu.
 
 ### Structure
 
-* **Core** -- part where resize algorithm is implemented
-* **CUI, GUI** -- console and graphics applications implementation respectively
+* **Core** -- *part where resize algorithm is implemented*
+* **CUI, GUI** -- *console and graphics applications implementation respectively*
 
 Copyright [Andery Tkachev](https://github.com/Andrey-Tkachev), [Nikita Orlov](https://github.com/acerikfy), Dmitriy Malygin, 2017.
 
