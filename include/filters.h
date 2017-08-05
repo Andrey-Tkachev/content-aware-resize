@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opencv2/opencv.hpp"
+#include "matrixwrapper.h"
 
 namespace filter {
     class Filter {
@@ -133,22 +134,32 @@ namespace filter {
         void operator()(cv::Mat& src, cv::Mat &dst) const override;
     };
 
-    class Compose : public Filter {
+    class Compose {
     private:
         std::vector<Filter *> fil;  // filtres
 
     public:
-        Compose() {}
+        Compose() = default;
 
-        Compose(const std::vector<Filter *> &filters)
+        explicit Compose(const std::vector<Filter *> &filters)
                 : fil(filters) {
         }
 
-        void operator()(cv::Mat& src, cv::Mat &dst) const override {
+        void operator()(cv::Mat& src, cv::Mat &dst) const {
             dst = src.clone();
             for (auto filter : fil) {
                 (*filter)(dst, dst);
             }
         }
+
+        void operator()(core::MatWrp src, core::MatWrp dst) const {
+            auto src_ = src.mat;
+            auto dst_ = src.mat.clone();
+            for (auto filter : fil) {
+                (*filter)(dst_, dst_);
+            }
+            dst.mat = dst_;
+        }
+
     };
 }

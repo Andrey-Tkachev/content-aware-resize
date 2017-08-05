@@ -11,7 +11,6 @@
 namespace po = boost::program_options;
 
 po::variables_map process_arguments(int argc, char **argv) {
-    Config &c = Singleton<Config>::Instance();
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help,?", "|  prints help page")
@@ -19,8 +18,6 @@ po::variables_map process_arguments(int argc, char **argv) {
             ("output-file,o", po::value<std::string>(), "|  path to output image")
             ("width,w", po::value<int>(), "|  desirable width")
             ("height,h", po::value<int>(), "|  desirable height")
-            ("percent,p", po::value<double>(),
-             "|  change both dimensions in percent")
             ("DEBUG", "|  DEBUG MODE")
         //("show-images,s", po::value<bool>()->default_value(false)->implicit_value(true),
         // "|  show images windows while working {DEBUG}")
@@ -37,7 +34,6 @@ po::variables_map process_arguments(int argc, char **argv) {
         throw 0;
     }
 
-    c.update_from(vm);
 
     return vm;
 }

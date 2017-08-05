@@ -1,1 +1,0 @@
-add_library(INTERFACE_LIB SHARED interface.cpp)

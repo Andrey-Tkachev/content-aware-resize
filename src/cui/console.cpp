@@ -6,7 +6,6 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include "io.h"
-#include "config.h"
 #include "interface.h"
 #include <boost/program_options.hpp>
 #include "utils.h"
@@ -15,14 +14,12 @@
 namespace po = boost::program_options;
 
 int main(int argc, char **argv) {
-    Config &config = Singleton<Config>::Instance();
     po::variables_map vm;
     try {
         vm = process_arguments(argc, argv);
     } catch (...) {
         return 0;
     }
-    //config.update_from(vm);
 
     if (vm.count("DEBUG")) {
         run_debug_code();
@@ -65,9 +62,14 @@ int main(int argc, char **argv) {
         out = io::bind_output(vm["input-file"].as<std::string>() + ".out.jpg");
     }
 
+    interface::Resize resize;
+    resize.init(in.read_image());
+    cv::Mat out_matrix;
+    resize.process(out_matrix, cv::Size(width, height));
+    out.write_image(out_matrix);
 
-    interface::process_image(in, out, cv::Size(width, height),
-                             false);
+//    interface::process_image(in, out, cv::Size(width, height),
+//                             false);
 
     return 0;
 }

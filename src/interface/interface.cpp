@@ -4,7 +4,6 @@
 
 #include "interface.h"
 #include "io.h"
-#include "config.h"
 #include "filters.h"
 #include "core.h"
 
@@ -32,9 +31,10 @@ namespace interface {
     Resize::init(cv::Mat&& in) {
         for (auto seam : vseams) delete seam;
         image = core::MatWrp(in);
-        cv::Mat energy;
+        core::MatWrp energy(in);
         filter(in, energy);
         vseams = core::get_seams(energy);
+        hseams = core::get_seams(energy);
     }
 
     Resize::~Resize() {}
@@ -46,15 +46,13 @@ namespace interface {
 
         core::resize_with_seams(in_wrp, in_size.width - new_size.width, vseams);
         in_wrp.transpose();
-        core::resize_with_filter(in_wrp, in_size.height - new_size.height, filter);
-
+//        core::resize_with_filter(in_wrp, in_size.height - new_size.height, filter);
+        core::resize_with_seams(in_wrp, in_size.height - new_size.height, hseams);
         result = in_wrp.mat;
     }
 
 
     void process_image(io::Input in, io::Output out, cv::Size size, bool show_images) {
-        Config &config = Singleton<Config>::Instance();
-
         cv::Mat input_matrix = in.read_image();
         cv::Mat output_matrix = in.read_image();
 

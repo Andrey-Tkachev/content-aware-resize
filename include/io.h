@@ -37,6 +37,8 @@ namespace io {
         void write_image(cv::Mat &mat);
 
         std::string get_path();
+
+
     };
 
     Input bind_input(const std::string &path);

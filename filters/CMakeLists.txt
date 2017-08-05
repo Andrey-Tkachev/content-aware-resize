@@ -1,3 +1,0 @@
-set(FILTERS_LIB_SOURCE filters.cpp)
-
-add_library(FILTERS_LIB SHARED ${FILTERS_LIB_SOURCE})
