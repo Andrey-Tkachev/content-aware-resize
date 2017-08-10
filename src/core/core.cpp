@@ -153,4 +153,13 @@ namespace core {
         }
         from = from(cv::Range(0, from.height()), cv::Range(0, from.width() - seams.size())).clone();
     }
+
+    void resize_with_seams(MatWrp& in, int delta, const Seams& seams) {
+        Seams to_procces(seams.begin(), seams.begin() + std::abs(delta));
+        if (delta > 0) {
+            remove_seams(in, to_procces);
+        } else if (delta < 0) {
+            add_seams(in, to_procces);
+        }
+    }
 }

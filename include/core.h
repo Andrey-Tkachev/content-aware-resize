@@ -15,8 +15,11 @@ namespace core {
 
     Seams get_seams(const MatWrp& energy);
     Seams get_seams(const MatWrp& energy, int k);
+
     void remove_seams(MatWrp& from, Seams seams);
     void add_seams(MatWrp& from, Seams seams);
+
+    void resize_with_seams(MatWrp& in, int delta, const Seams& seams);
 
     template <typename TFilter>
     void resize_with_filter(MatWrp& in, int delta, const TFilter& filter) {
@@ -35,14 +38,7 @@ namespace core {
         }
     }
 
-    void resize_with_seams(MatWrp& in, int delta, const Seams& seams) {
-        Seams to_procces(seams.begin(), seams.begin() + std::abs(delta));
-        if (delta > 0) {
-            remove_seams(in, to_procces);
-        } else if (delta < 0) {
-            add_seams(in, to_procces);
-        }
-    }
+
 
     template<typename TFilter>
     void resize_to_fit(const cv::Mat &in, cv::Mat &out, const cv::Size &new_size, TFilter filter) {
