@@ -41,7 +41,7 @@ namespace core {
 
 
     template<typename TFilter>
-    void resize_to_fit(const cv::Mat &in, cv::Mat &out, const cv::Size &new_size, TFilter filter) {
+    void resize_to_fit(const cv::Mat &in, cv::Mat &out, const cv::Size &new_size, const TFilter& filter) {
         cv::Size in_size = in.size();
         MatWrp in_wrp(in.clone());
 

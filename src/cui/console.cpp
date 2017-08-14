@@ -67,9 +67,5 @@ int main(int argc, char **argv) {
     cv::Mat out_matrix;
     resize.process(out_matrix, cv::Size(width, height));
     out.write_image(out_matrix);
-
-//    interface::process_image(in, out, cv::Size(width, height),
-//                             false);
-
     return 0;
 }

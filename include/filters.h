@@ -6,7 +6,7 @@
 namespace filter {
     class Filter {
     public:
-        virtual void operator()(cv::Mat& src, cv::Mat &dst) const = 0;
+        virtual void operator()(cv::Mat& src, cv::Mat& dst) const = 0;
 
         virtual ~Filter() {}
     };
@@ -22,7 +22,7 @@ namespace filter {
     public:
         GausBlur(cv::Size size, double X, double Y, int borT);
 
-        void operator()(cv::Mat& src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat& dst) const override;
 
         cv::Size getKsize();
 
@@ -56,7 +56,7 @@ namespace filter {
         Sobel(int x, int y, int size, double sc, double del, int ddepth,
               int bT);
 
-        void operator()(cv::Mat& src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat& dst) const override;
 
         int getXord();
 
@@ -97,7 +97,7 @@ namespace filter {
     public:
         Canny(int low_threshold, int ratio, int kernel_size);
 
-        void operator()(cv::Mat& src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat& dst) const override;
 
         int getLowThreshold();
 
@@ -120,7 +120,7 @@ namespace filter {
     public:
         Blur(int sigma);
 
-        void operator()(cv::Mat& src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat& dst) const override;
 
         int getSigma();
 
@@ -131,34 +131,27 @@ namespace filter {
     public:
         GrayScale();
 
-        void operator()(cv::Mat& src, cv::Mat &dst) const override;
+        void operator()(cv::Mat& src, cv::Mat& dst) const override;
     };
 
-    class Compose {
+    class Compose : public  Filter {
     private:
         std::vector<Filter *> fil;  // filtres
 
     public:
         Compose() = default;
 
-        explicit Compose(const std::vector<Filter *> &filters)
+        explicit Compose(const std::vector<Filter*> &filters)
                 : fil(filters) {
         }
 
         void operator()(cv::Mat& src, cv::Mat &dst) const {
             dst = src.clone();
             for (auto filter : fil) {
-                (*filter)(dst, dst);
+                cv::Mat new_dst;
+                (*filter)(dst, new_dst);
+                std::swap(dst, new_dst);
             }
-        }
-
-        void operator()(core::MatWrp src, core::MatWrp dst) const {
-            auto src_ = src.mat;
-            auto dst_ = src.mat.clone();
-            for (auto filter : fil) {
-                (*filter)(dst_, dst_);
-            }
-            dst.mat = dst_;
         }
 
     };

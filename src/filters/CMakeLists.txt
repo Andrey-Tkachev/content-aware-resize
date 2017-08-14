@@ -1,3 +1,3 @@
-set(FILTERS_SOURCE filters.cpp ../../include/filters.h)
-
-#add_library(FILTERS_LIB SHARED ${FILTERS_LIB_SOURCE})
+set(FILTERS_SOURCE
+        ${CMAKE_CURRENT_SOURCE_DIR}/filters.cpp
+    PARENT_SCOPE)

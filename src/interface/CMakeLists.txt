@@ -1,2 +1,3 @@
-set(INTERFACE_SOURCE interface.cpp ../../include/interface.h)
-#add_library(INTERFACE_LIB SHARED ${INTERFACE_SOURCE})
+set(INTERFACE_SOURCE
+        ${CMAKE_CURRENT_SOURCE_DIR}/interface.cpp
+    PARENT_SCOPE)

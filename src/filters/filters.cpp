@@ -1,8 +1,3 @@
-//
-// Created by nikita on 07.07.17.
-//
-
-
 #include "filters.h"
 
 namespace filter {

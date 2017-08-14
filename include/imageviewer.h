@@ -9,6 +9,7 @@ class QAction;
 class QMenu;
 
 class ImageViewer : public QMainWindow {
+    Q_OBJECT
 public:
     ImageViewer();
     bool loadFile(const QString &);
