@@ -1,4 +1,4 @@
-set(UTILS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/radix.cpp
+set(UTILS_SOURCE
                  ${CMAKE_CURRENT_SOURCE_DIR}/io.cpp
                  ${CMAKE_CURRENT_SOURCE_DIR}/singleton.cpp
     PARENT_SCOPE)

@@ -8,7 +8,6 @@
 #include "io.h"
 #include "interface.h"
 #include <boost/program_options.hpp>
-#include "utils.h"
 #include "useful_funcitons_RENAME.cpp"
 
 namespace po = boost::program_options;

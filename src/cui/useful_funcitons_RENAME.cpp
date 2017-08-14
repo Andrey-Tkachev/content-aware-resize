@@ -1,7 +1,3 @@
-//
-// Created by nikita on 08.07.17.
-//
-
 #pragma once
 
 #include <boost/program_options.hpp>
@@ -19,8 +15,6 @@ po::variables_map process_arguments(int argc, char **argv) {
             ("width,w", po::value<int>(), "|  desirable width")
             ("height,h", po::value<int>(), "|  desirable height")
             ("DEBUG", "|  DEBUG MODE")
-        //("show-images,s", po::value<bool>()->default_value(false)->implicit_value(true),
-        // "|  show images windows while working {DEBUG}")
             ;
 
 
