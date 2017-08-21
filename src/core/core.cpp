@@ -1,7 +1,5 @@
 #include "core.h"
-#include "matrixwrapper.h"
-#include <opencv2/opencv.hpp>
-#include <climits>
+#include <memory>
 
 namespace core {
 
@@ -55,7 +53,7 @@ namespace core {
                         const MatWrp& optimum_energy,
                         const std::vector<WeightData>& matches,
                         MatWrp& seam_energy,
-                        std::vector<seam*>& seams,
+                        Seams& seams,
                         int row) {
         int x = energy.width() - 1;
         while (x >= 0) {
@@ -78,8 +76,8 @@ namespace core {
         }
     }
 
-    bool seam_comparator(const std::pair<WeightData, seam*>& it1,
-                         const std::pair<WeightData, seam*>& it2) {
+    bool seam_comparator(const std::pair<WeightData, std::shared_ptr<seam>>& it1,
+                         const std::pair<WeightData, std::shared_ptr<seam>>& it2) {
         return it1.first < it2.first;
     }
 
@@ -91,12 +89,12 @@ namespace core {
         optimum_energy.set_shape(energy);
         calc_optimum_dynamics(energy, optimum_energy);
 
-        std::vector<seam*> seams(energy.width());
+        Seams seams(energy.width());
         for (int i = 0; i < energy.width(); ++i) {
             seam_energy.at<WeightData>(0, i) = energy.at<EnergyData>(0, i);
-            seams[i] = new seam();
+            seams[i] = std::make_shared<seam> (seam());
             seams[i]->reserve(energy.height());
-            seams[i]->push_back(0);
+            seams[i]->push_back(i);
         }
 
         std::vector<WeightData> matches(energy.width());
@@ -105,7 +103,7 @@ namespace core {
             increase_seams(energy, optimum_energy, matches, seam_energy, seams, row);
         }
 
-        std::vector<std::pair<WeightData, seam*>> weighted_seams;
+        std::vector<std::pair<WeightData, std::shared_ptr<seam>>> weighted_seams;
         weighted_seams.reserve(seams.size());
         for (int i = 0; i != seams.size(); ++i) {
             weighted_seams.emplace_back(std::make_pair(seam_energy.at<WeightData>(energy.height() - 1, i),
@@ -124,13 +122,14 @@ namespace core {
         return get_seams(energy, energy.width());
     }
 
-    void add_seams(MatWrp& from, Seams seams) {
-        auto w_delta = static_cast<int> (seams.size());
+    void process_seams(MatWrp& from, Seams& seams, bool delete_mode) {
+        auto w_delta = static_cast<int> (seams.size()) * (delete_mode ? -1 : 1);
         MatWrp out(from.mat.rows + (from.is_transposed() ? w_delta : 0),
                    from.mat.cols + (from.is_transposed() ? 0 : w_delta), from.mat.type());
         out.set_orientation(from);
         for (int row = 0; row < from.height(); ++row) {
             seam pool;
+            pool.reserve(seams.size());
             for (const auto& seam : seams) {
                 pool.push_back((*seam)[from.height() - row - 1]);
             }
@@ -138,45 +137,15 @@ namespace core {
             int delta = 0;
             int curr_pix = 0;
             for (int col = 0; col < from.width(); ++col) {
-                out.at<cv::Vec3b>(row, col + delta) = from.at<cv::Vec3b>(row, col);
                 if (curr_pix < pool.size() && col == pool[curr_pix]) {
                     ++curr_pix;
-                    delta += 1;
-                    out.at<cv::Vec3b>(row, col + delta) = from.at<cv::Vec3b>(row, col);
-                    continue;
+                    delta += (delete_mode ? -1 : 1);
+                    if (delete_mode) continue;
+                    out.at<cv::Vec3b>(row, col + delta - 1) = from.at<cv::Vec3b>(row, col);
                 }
+                out.at<cv::Vec3b>(row, col + delta) = from.at<cv::Vec3b>(row, col);
             }
         }
         from = out;
-    }
-
-    void remove_seams(MatWrp& from, Seams seams) {
-        for (int row = 0; row < from.height(); ++row) {
-            seam pool;
-            for (const auto& seam : seams) {
-                pool.push_back((*seam)[row]);
-            }
-            std::sort(pool.begin(), pool.end());
-            int delta = 0;
-            int curr_pix = 0;
-            for (register int col = pool[curr_pix]; col < from.width(); ++col) {
-                if (curr_pix < pool.size() && col == pool[curr_pix]) {
-                    ++curr_pix;
-                    delta -= 1;
-                    continue;
-                }
-                from.at<cv::Vec3b>(row, col + delta) = from.at<cv::Vec3b>(row, col);
-            }
-        }
-        from = from(cv::Range(0, from.height()), cv::Range(0, from.width() - seams.size()));
-    }
-
-    void resize_with_seams(MatWrp& in, int delta, const Seams& seams) {
-        Seams to_procces(seams.begin(), seams.begin() + std::abs(delta));
-        if (delta > 0) {
-            remove_seams(in, to_procces);
-        } else if (delta < 0) {
-            add_seams(in, to_procces);
-        }
     }
 }

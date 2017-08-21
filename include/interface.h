@@ -24,7 +24,7 @@ namespace interface {
     public:
         Resize();
         void init(cv::Mat&& in);
-        ~Resize();
+        ~Resize() = default;
 
         bool is_init() const;
 

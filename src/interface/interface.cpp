@@ -1,13 +1,13 @@
 #include "interface.h"
-#include "filters.h"
 #include "core.h"
 
 namespace interface {
     filter::Compose build_filters() {
         auto* gs = new filter::GrayScale();
-        auto* blur = new filter::Blur(/*sigma = */ 3);
+        auto* blur = new filter::Blur(/*sigma = */ 5);
         auto* canny = new filter::Canny(/*low_threshold = */ 20, /*ratio = */ 3, /*kernel_size = */ 3);
-        std::vector<filter::Filter *> filters = {gs, blur, canny};
+        filter::Sobel *sbl = new filter::Sobel(0, 0, 3, 1, 0, CV_16S, cv::BORDER_DEFAULT);
+        std::vector<filter::Filter *> filters = {gs, blur, sbl};
         filter::Compose compose(filters);
         return compose;
     }
@@ -23,28 +23,27 @@ namespace interface {
 
     void
     Resize::init(cv::Mat&& in) {
-        for (auto seam : vseams) delete seam;
-        vseams.clear();
         image = core::MatWrp(in);
         core::MatWrp energy(in);
         filter(in, energy.mat);
         vseams = core::get_seams(energy);
-        energy.transpose();
     }
 
-    Resize::~Resize() {
-        for (auto seam : vseams) delete seam;
-        vseams.clear();
-    }
 
     void
     Resize::process(cv::Mat& result, cv::Size new_size) {
-        cv::Size in_size = image.mat.size();
         core::MatWrp in_wrp(image.clone());
 
-        core::resize_with_seams(in_wrp, in_size.width - new_size.width, vseams);
+        int h_delta = new_size.height - in_wrp.height();
+        int w_delta = new_size.width - in_wrp.width();
+        auto needed_vseams = Seams(vseams.begin(), vseams.begin() + std::abs(w_delta));
+        core::process_seams(in_wrp, needed_vseams, w_delta < 0);
+        core::MatWrp energy(in_wrp.mat);
+        filter(in_wrp.mat, energy.mat);
+        energy.transpose();
         in_wrp.transpose();
-        core::resize_with_filter(in_wrp, in_size.height - new_size.height, filter);
+        auto needed_hseams = core::get_seams(energy, std::abs(h_delta));
+        core::process_seams(in_wrp, needed_hseams, h_delta < 0);
         result = in_wrp.mat;
     }
 }

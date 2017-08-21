@@ -80,8 +80,8 @@ bool ImageViewer::loadFile(const QString &fileName)
 void ImageViewer::setImage(const QImage &newImage)
 {
     image = newImage;
-    this->resize(QSize(newImage.width(), newImage.height() + this->menuBar()->height() + this->statusBar()->height()));
     imageLabel->setPixmap(QPixmap::fromImage(image));
+    this->resize(QSize(newImage.width(), newImage.height() + this->menuBar()->height() + this->statusBar()->height()));
     updateActions();
 }
 
