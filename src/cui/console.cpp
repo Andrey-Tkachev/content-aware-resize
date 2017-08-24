@@ -1,14 +1,9 @@
 //
 // Created by nikita on 05.07.17.
 //
-#include <iostream>
-#include <opencv2/core/core.hpp>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include "io.h"
-#include "interface.h"
 #include <boost/program_options.hpp>
-#include "useful_funcitons_RENAME.cpp"
+#include "xinar.h"
+#include "config.h"
 
 namespace po = boost::program_options;
 
@@ -25,11 +20,11 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    io::Input in;
-    io::Output out;
+    xinar::io::Input in;
+    xinar::io::Output out;
 
     if (vm.count("input-file")) {
-        in = io::bind_input(vm["input-file"].as<std::string>());
+        in = xinar::io::bind_input(vm["input-file"].as<std::string>());
     } else {
         std::cerr << "No input file providen!\n";
         return -1;
@@ -55,13 +50,15 @@ int main(int argc, char **argv) {
         std::cerr << "No width providen!\n";
     }
 
+    if ()
+
     if (vm.count("output-file")) {
-        out = io::bind_output(vm["output-file"].as<std::string>());
+        out = xinar::io::bind_output(vm["output-file"].as<std::string>());
     } else {
-        out = io::bind_output(vm["input-file"].as<std::string>() + ".out.jpg");
+        out = xinar::io::bind_output(vm["input-file"].as<std::string>() + ".out.jpg");
     }
 
-    interface::Resize resize;
+    xinar::Resize resize;
     resize.init(in.read_image());
     cv::Mat out_matrix;
     resize.process(out_matrix, cv::Size(width, height));

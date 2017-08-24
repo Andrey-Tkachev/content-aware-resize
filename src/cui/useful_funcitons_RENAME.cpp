@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boost/program_options.hpp>
-#include "utils.h"
+#include "../include/utils.h"
 #include <chrono>
 
 namespace po = boost::program_options;

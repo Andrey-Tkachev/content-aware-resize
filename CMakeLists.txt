@@ -5,12 +5,12 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenCV REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS program_options system filesystem REQUIRED)
 
 enable_testing()
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 14)
-include_directories(include)
+include_directories(include src/include)
 
 add_subdirectory(src/filters)
 add_subdirectory(src/utils)

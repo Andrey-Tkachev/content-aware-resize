@@ -1,8 +1,8 @@
 
 #include <QtWidgets>
 #include <opencv2/opencv.hpp>
-#include "resizable_label.h"
-#include "imageviewer.h"
+#include "../include/resizable_label.h"
+#include "../include/imageviewer.h"
 
 
 QImage Mat2QImage(cv::Mat const& src) {

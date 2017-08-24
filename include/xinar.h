@@ -1,11 +1,11 @@
 #pragma once
 
-#include"io.h"
-#include "matrixwrapper.h"
-#include "types.h"
-#include "filters.h"
+#include "../src/include/io.h"
+#include "../src/include/matrixwrapper.h"
+#include "../src/include/types.h"
+#include "../src/include/filters.h"
 
-namespace interface {
+namespace xinar {
     /**
      * Class Reize
      *
@@ -21,23 +21,33 @@ namespace interface {
         Seams hseams; // horizontal seams
         Seams vseams; // vertical seams
 
+        bool _is_init;
+
     public:
+        /**
+         * Class constructor. Gets no parameters, prepares class
+         * for future calculations.
+         */
         Resize();
-        void init(cv::Mat&& in);
+
+        void init(cv::Mat &&in);
+        void init(cv::Mat &in);
+        void release();
+
         ~Resize() = default;
 
         bool is_init() const;
 
-        void process(cv::Mat& result, cv::Size new_size);
+        void process(cv::Mat &result, cv::Size new_size);
     };
 
     filter::Compose build_filters();
 
     /**
-     * Deprecated methiod
+     * Deprecated method
      */
 
-    void process_image(io::Input in, io::Output out, cv::Size size, bool show_images);
+    //void process_image(io::Input in, io::Output out, cv::Size size, bool show_images);
 
     //Filter *build_filters();
 
