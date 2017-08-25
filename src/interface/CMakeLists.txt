@@ -1,3 +1,0 @@
-set(INTERFACE_SOURCE
-        ${CMAKE_CURRENT_SOURCE_DIR}/xinar.cpp
-    PARENT_SCOPE)

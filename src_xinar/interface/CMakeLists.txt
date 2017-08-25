@@ -1,0 +1,3 @@
+set(INTERFACE_SOURCE
+        ${CMAKE_CURRENT_SOURCE_DIR}/resizer.cpp
+    PARENT_SCOPE)
