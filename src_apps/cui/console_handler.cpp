@@ -26,12 +26,10 @@ constexpr inline const char *help_page() {
 }
 
 bool check_dims(cv::Mat image, cv::Size desireable_size) {
-    if (desireable_size.height > 2 * image.rows ||
-        desireable_size.width > 2 * image.cols   /*||
-        desireable_size.height < image.rows / 2 ||
-        desireable_size.width < image.cols / 2*/) {
+    /* if (desireable_size.height > 2 * image.rows ||
+        desireable_size.width > 2 * image.cols) {
         return false;
-    }
+    }*/
     return true;
 }
 
