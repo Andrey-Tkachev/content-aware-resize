@@ -44,4 +44,5 @@ namespace xinar {
      * Method provides resizing services.
      */
     void resize(const cv::Mat& in, cv::Mat& out, cv::Size new_size);
+    void maskresize(const cv::Mat& in, const cv::Mat& maskin, cv::Mat& out, cv::Size new_size);
 }
