@@ -2,6 +2,16 @@
 #include "core.h"
 
 namespace xinar {
+    //TODO: edit this function to apply resizing width with mask.
+    void _resize_width_with_mask(core::MatWrp& in, int delta, std::shared_ptr<filter::Filter> filter) {
+        if (delta == 0) return;
+        core::MatWrp energy_wrp(in.mat.rows, in.mat.cols, in.mat.type());
+        energy_wrp.set_orientation(in);
+        (*filter)(in.mat, energy_wrp.mat);
+        auto seams = core::get_seams(energy_wrp, std::abs(delta));
+        core::process_seams(in, seams, delta < 0);
+    }
+    
     void _resize_width(core::MatWrp& in, int delta, std::shared_ptr<filter::Filter> filter) {
         if (delta == 0) return;
         core::MatWrp energy_wrp(in.mat.rows, in.mat.cols, in.mat.type());
