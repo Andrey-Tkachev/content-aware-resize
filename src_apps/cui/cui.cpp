@@ -33,12 +33,20 @@ int main(int argc, char **argv) {
     }
 
     xinar_utils::io::Input in;
+    xinar_utils::io::Input maskin;
     xinar_utils::io::Output out;
 
     if (vm.count("input-file")) {
         in = io::bind_input(vm["input-file"].as<std::string>());
     } else {
         std::cerr << "No input file providen!\n";
+        return 1;
+    }
+
+    if (vm.count("mask")) {
+        maskin = io::bind_input(vm["mask"].as<std::string>());
+    } else {
+        std::cerr << "No mask file providen!\n";
         return 1;
     }
 
@@ -49,6 +57,7 @@ int main(int argc, char **argv) {
     }
 
     auto image = in.read_image();
+    auto maskimage = maskin.read_image();
 
     if (image.empty()) {
         std::cerr << "Error while opening file. Passed: \"" << in.get_path() << "\"\n";
@@ -79,7 +88,8 @@ int main(int argc, char **argv) {
     }
 
     cv::Mat output;
-    xinar::resize(image, output, size);
+    //xinar::resize(image, output, size);
+    xinar::maskresize(image, maskimage, output, size);
     out.write_image(output);
     return 0;
 }
