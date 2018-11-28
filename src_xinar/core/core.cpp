@@ -1,5 +1,6 @@
 #include "core.h"
 #include <memory>
+#include <iostream>
 
 namespace xinar {
     namespace core {
@@ -29,6 +30,7 @@ namespace xinar {
                         }
                     }
                     dynamics.at<WeightData>(curr_row, curr_col) = curr_min;
+                    
                 }
             }
         }

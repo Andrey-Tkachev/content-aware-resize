@@ -7,12 +7,16 @@ namespace xinar {
     void _mask_resize_width(core::MatWrp& in, core::MatWrp& maskin, int delta, std::shared_ptr<filter::Filter> filter) {
         if (delta == 0) return;
         core::MatWrp energy_wrp(in.mat.rows, in.mat.cols, in.mat.type());
-        energy_wrp.set_orientation(in);
+        energy_wrp.set_orientation(in);        
+        core::MatWrp super_energy_wrp(maskin.mat.rows, maskin.mat.cols, maskin.mat.type());
+        energy_wrp.set_orientation(maskin);
+        // core::MatWrp in_temp(in.mat.clone());
+        // cv::Mat & mapc = in_temp.mat;
+        (*filter)(in.mat, energy_wrp.mat);
+        (*filter)(maskin.mat, super_energy_wrp.mat);
+        // (*filter)(in.mat, energy_wrp.mat);
+        cv::add(super_energy_wrp.mat, energy_wrp.mat, energy_wrp.mat);
         
-        core::MatWrp in_temp(in.mat.clone());
-        cv::Mat & mapc = in_temp.mat;
-        cv::add(maskin.mat, in.mat, mapc);
-        (*filter)(mapc, energy_wrp.mat);
         auto seams = core::get_seams(energy_wrp, std::abs(delta));
         core::process_seams(in, seams, delta < 0);
     }

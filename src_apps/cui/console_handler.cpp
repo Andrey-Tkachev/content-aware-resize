@@ -71,6 +71,7 @@ boost::program_options::options_description build_options() {
     desc.add_options()
             ("help,?", "|  prints this page")
             ("input-file,i", po::value<std::string>(), "|  path to input image")
+            ("mask,m", po::value<std::string>(), "|  path to mask image")
             ("output-file,o", po::value<std::string>(), "|  path to output image")
             ("width,w", po::value<int>(), "|  desirable width")
             ("height,h", po::value<int>(), "|  desirable height")
