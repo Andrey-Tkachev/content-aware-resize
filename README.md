@@ -40,18 +40,13 @@ via GUI.
 
 Console usage example:
 
-Resize image ```examle.jpg``` to 600 by 600 pixels:
+Resize image ```examle.jpg``` using mask ```mask.jpg``` to 600 by 600 pixels:
 
 ```
-:~$ ./cxinar -i example.jpg -w 600 -h 600
+:~$ ./cxinar -m mask.jpg -i example.jpg -w 600 -h 600
 ```
 All commands are available via ``` -? ``` (```--help```) flag.
 
-
-GUI usage example:
-
-Just run *uxinar* as executable and choose file to resize in the file menu. 
-To resize change size of the window.
 
 **NOTE:** Xinar can resize picture up to 2 times in both height and width 
 while expanding picture.
