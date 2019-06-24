@@ -99,5 +99,5 @@ All documentation is available in ```docs``` folder.
 * **utils** -- *various code to make life happier*
 
 Copyright [Andery Tkachev](https://github.com/Andrey-Tkachev), 
-[Nikita Orlov](https://github.com/acerikfy), Dmitriy Malygin, 2017.
+[Nikita Orlov](https://github.com/naorlov), Dmitriy Malygin, 2017.
 
